@@ -1,0 +1,7 @@
+{"event":"lead_notification","lead_id":2,"success":false,"message":"Could not instantiate mail function.","logged_at":"2026-06-09T12:30:50+00:00"}
+{"event":"lead_notification","lead_id":3,"success":true,"message":"Notification email sent.","logged_at":"2026-06-09T12:54:36+00:00"}
+{"event":"lead_notification","lead_id":4,"success":true,"message":"Notification email sent.","logged_at":"2026-06-09T12:57:45+00:00"}
+{"event":"lead_notification","lead_id":5,"success":true,"message":"Notification email sent.","logged_at":"2026-06-09T13:23:22+00:00"}
+{"event":"lead_notification","lead_id":6,"success":true,"message":"Notification email sent.","logged_at":"2026-06-09T13:48:06+00:00"}
+{"event":"lead_notification","lead_id":7,"success":true,"message":"Notification email sent.","logged_at":"2026-06-09T13:52:44+00:00"}
+{"event":"lead_notification","lead_id":8,"success":true,"message":"Notification email sent.","logged_at":"2026-06-09T14:04:27+00:00"}

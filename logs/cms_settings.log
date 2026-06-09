@@ -1,0 +1,40 @@
+{"event":"setting_update","setting":"site_phone","old_value":"+91 VERIFY 1781008248","new_value":"+91 79962 05203","saved":true,"logged_at":"2026-06-09T12:33:39+00:00"}
+{"event":"setting_update","setting":"site_email","old_value":"hello@learnwise.com","new_value":"narmadha@edulearnwise.com","saved":true,"logged_at":"2026-06-09T12:33:39+00:00"}
+{"event":"setting_update","setting":"whatsapp_number","old_value":"+91 98765 43210","new_value":"+91 79962 05203","saved":true,"logged_at":"2026-06-09T12:33:39+00:00"}
+{"event":"setting_update","setting":"address","old_value":"86 EdTech Lane, Mumbai, India","new_value":"86 EdTech Lane, Mumbai, India","saved":true,"logged_at":"2026-06-09T12:33:39+00:00"}
+{"event":"setting_update","setting":"footer_text","old_value":"LearnWise helps families access premium online classes, clear progress tracking, and trusted educators in one beautifully simple experience.","new_value":"LearnWise helps families access premium online classes, clear progress tracking, and trusted educators in one beautifully simple experience.","saved":true,"logged_at":"2026-06-09T12:33:39+00:00"}
+{"event":"setting_update","setting":"site_name","old_value":"LearnWise","new_value":"LearnWise","saved":true,"logged_at":"2026-06-09T12:33:39+00:00"}
+{"event":"setting_update","setting":"site_tagline","old_value":"A flexible learning website powered by your own CMS.","new_value":"A flexible learning website powered by your own CMS.","saved":true,"logged_at":"2026-06-09T12:33:39+00:00"}
+{"event":"setting_update","setting":"nav_cta_text","old_value":"Book Free Trial","new_value":"Book Free Trial","saved":true,"logged_at":"2026-06-09T12:33:39+00:00"}
+{"event":"setting_update","setting":"nav_cta_link","old_value":"#lead-form","new_value":"#lead-form","saved":true,"logged_at":"2026-06-09T12:33:39+00:00"}
+{"event":"setting_update","setting":"footer_legal_privacy","old_value":"privacy.php","new_value":"privacy.php","saved":true,"logged_at":"2026-06-09T12:33:39+00:00"}
+{"event":"setting_update","setting":"footer_legal_terms","old_value":"terms.php","new_value":"terms.php","saved":true,"logged_at":"2026-06-09T12:33:39+00:00"}
+{"event":"setting_update","setting":"admin_notification_email","old_value":"hello@learnwise.com","new_value":"narmadha@edulearnwise.com","saved":true,"logged_at":"2026-06-09T12:33:39+00:00"}
+{"event":"setting_update","setting":"smtp_host","old_value":"","new_value":"","saved":true,"logged_at":"2026-06-09T12:33:39+00:00"}
+{"event":"setting_update","setting":"smtp_port","old_value":"587","new_value":"587","saved":true,"logged_at":"2026-06-09T12:33:39+00:00"}
+{"event":"setting_update","setting":"smtp_username","old_value":"","new_value":"admin@learnwise.com","saved":true,"logged_at":"2026-06-09T12:33:39+00:00"}
+{"event":"setting_update","setting":"smtp_password","old_value":"","new_value":"password","saved":true,"logged_at":"2026-06-09T12:33:39+00:00"}
+{"event":"setting_update","setting":"smtp_encryption","old_value":"tls","new_value":"tls","saved":true,"logged_at":"2026-06-09T12:33:39+00:00"}
+{"event":"setting_update","setting":"smtp_from_email","old_value":"noreply@learnwise.com","new_value":"noreply@learnwise.com","saved":true,"logged_at":"2026-06-09T12:33:39+00:00"}
+{"event":"setting_update","setting":"smtp_from_name","old_value":"LearnWise Website","new_value":"LearnWise Website","saved":true,"logged_at":"2026-06-09T12:33:39+00:00"}
+{"event":"setting_update","setting":"social_links","old_value":"[{\"label\":\"Instagram\",\"url\":\"https://instagram.com\"},{\"label\":\"LinkedIn\",\"url\":\"https://linkedin.com\"},{\"label\":\"YouTube\",\"url\":\"https://youtube.com\"}]","new_value":"[{\"label\":\"Instagram\",\"url\":\"https://instagram.com\"},{\"label\":\"LinkedIn\",\"url\":\"https://linkedin.com\"},{\"label\":\"YouTube\",\"url\":\"https://youtube.com\"}]","saved":true,"logged_at":"2026-06-09T12:33:39+00:00"}
+{"event":"setting_update","setting":"site_phone","old_value":"+91 79962 05203","new_value":"+91 79962 05203","saved":true,"logged_at":"2026-06-09T12:52:55+00:00"}
+{"event":"setting_update","setting":"site_email","old_value":"narmadha@edulearnwise.com","new_value":"narmadha@edulearnwise.com","saved":true,"logged_at":"2026-06-09T12:52:55+00:00"}
+{"event":"setting_update","setting":"whatsapp_number","old_value":"+91 79962 05203","new_value":"+91 79962 05203","saved":true,"logged_at":"2026-06-09T12:52:55+00:00"}
+{"event":"setting_update","setting":"address","old_value":"86 EdTech Lane, Mumbai, India","new_value":"86 EdTech Lane, Mumbai, India","saved":true,"logged_at":"2026-06-09T12:52:55+00:00"}
+{"event":"setting_update","setting":"footer_text","old_value":"LearnWise helps families access premium online classes, clear progress tracking, and trusted educators in one beautifully simple experience.","new_value":"LearnWise helps families access premium online classes, clear progress tracking, and trusted educators in one beautifully simple experience.","saved":true,"logged_at":"2026-06-09T12:52:55+00:00"}
+{"event":"setting_update","setting":"site_name","old_value":"LearnWise","new_value":"LearnWise","saved":true,"logged_at":"2026-06-09T12:52:55+00:00"}
+{"event":"setting_update","setting":"site_tagline","old_value":"A flexible learning website powered by your own CMS.","new_value":"A flexible learning website powered by your own CMS.","saved":true,"logged_at":"2026-06-09T12:52:55+00:00"}
+{"event":"setting_update","setting":"nav_cta_text","old_value":"Book Free Trial","new_value":"Book Free Trial","saved":true,"logged_at":"2026-06-09T12:52:55+00:00"}
+{"event":"setting_update","setting":"nav_cta_link","old_value":"#lead-form","new_value":"#lead-form","saved":true,"logged_at":"2026-06-09T12:52:55+00:00"}
+{"event":"setting_update","setting":"footer_legal_privacy","old_value":"privacy.php","new_value":"privacy.php","saved":true,"logged_at":"2026-06-09T12:52:55+00:00"}
+{"event":"setting_update","setting":"footer_legal_terms","old_value":"terms.php","new_value":"terms.php","saved":true,"logged_at":"2026-06-09T12:52:55+00:00"}
+{"event":"setting_update","setting":"admin_notification_email","old_value":"narmadha@edulearnwise.com","new_value":"narmadha@edulearnwise.com","saved":true,"logged_at":"2026-06-09T12:52:55+00:00"}
+{"event":"setting_update","setting":"smtp_host","old_value":"","new_value":"smtp.gmail.com","saved":true,"logged_at":"2026-06-09T12:52:55+00:00"}
+{"event":"setting_update","setting":"smtp_port","old_value":"587","new_value":"587","saved":true,"logged_at":"2026-06-09T12:52:55+00:00"}
+{"event":"setting_update","setting":"smtp_username","old_value":"admin@learnwise.com","new_value":"narmadha@edulearnwise.com","saved":true,"logged_at":"2026-06-09T12:52:55+00:00"}
+{"event":"setting_update","setting":"smtp_password","old_value":"password","new_value":"kxrkvprysryfwzse","saved":true,"logged_at":"2026-06-09T12:52:55+00:00"}
+{"event":"setting_update","setting":"smtp_encryption","old_value":"tls","new_value":"tls","saved":true,"logged_at":"2026-06-09T12:52:55+00:00"}
+{"event":"setting_update","setting":"smtp_from_email","old_value":"noreply@learnwise.com","new_value":"narmadha@edulearnwise.com","saved":true,"logged_at":"2026-06-09T12:52:55+00:00"}
+{"event":"setting_update","setting":"smtp_from_name","old_value":"LearnWise Website","new_value":"LearnWise Website","saved":true,"logged_at":"2026-06-09T12:52:55+00:00"}
+{"event":"setting_update","setting":"social_links","old_value":"[{\"label\":\"Instagram\",\"url\":\"https://instagram.com\"},{\"label\":\"LinkedIn\",\"url\":\"https://linkedin.com\"},{\"label\":\"YouTube\",\"url\":\"https://youtube.com\"}]","new_value":"[{\"label\":\"Instagram\",\"url\":\"https://instagram.com\"},{\"label\":\"LinkedIn\",\"url\":\"https://linkedin.com\"},{\"label\":\"YouTube\",\"url\":\"https://youtube.com\"}]","saved":true,"logged_at":"2026-06-09T12:52:55+00:00"}

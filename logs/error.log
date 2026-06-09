@@ -1,0 +1,17 @@
+[10-May-2026 08:09:05 UTC] [LearnWise] PHP error [2] Undefined array key "REQUEST_METHOD" in C:\wamp64\www\learnwise\includes\form-handler.php:8
+[10-May-2026 08:09:05 UTC] [LearnWise] PHP error [2] Undefined array key "REQUEST_METHOD" in C:\wamp64\www\learnwise\includes\form-handler.php:8
+[10-May-2026 08:10:39 UTC] [LearnWise] PHP error [2] Undefined array key "REQUEST_METHOD" in C:\wamp64\www\learnwise\includes\form-handler.php:8
+[10-May-2026 08:10:39 UTC] [LearnWise] PHP error [2] Undefined array key "REQUEST_METHOD" in C:\wamp64\www\learnwise\includes\form-handler.php:8
+[10-May-2026 08:11:17 UTC] [LearnWise] PHP error [2] Undefined array key "REQUEST_METHOD" in C:\wamp64\www\learnwise\includes\form-handler.php:8
+[10-May-2026 08:14:04 UTC] [LearnWise] PHP error [2] Undefined array key "REQUEST_METHOD" in C:\wamp64\www\learnwise\includes\form-handler.php:8
+[09-Jun-2026 12:04:29 UTC] [LearnWise] Error in C:\wamp64\www\learnwise\includes\site.php:82 | Call to a member function prepare() on null
+[09-Jun-2026 12:04:35 UTC] [LearnWise] Error in C:\wamp64\www\learnwise\includes\site.php:82 | Call to a member function prepare() on null
+[09-Jun-2026 12:12:09 UTC] [LearnWise] Error in C:\wamp64\www\learnwise\includes\site.php:82 | Call to a member function prepare() on null
+[09-Jun-2026 12:18:20 UTC] [LearnWise] Error in C:\wamp64\www\learnwise\includes\site.php:82 | Call to a member function prepare() on null
+[09-Jun-2026 12:20:18 UTC] [LearnWise] Error in C:\wamp64\www\learnwise\includes\site.php:82 | Call to a member function prepare() on null
+[09-Jun-2026 12:25:21 UTC] [LearnWise] Error in C:\wamp64\www\learnwise\includes\site.php:82 | Call to a member function prepare() on null
+[09-Jun-2026 12:30:13 UTC] PHP Fatal error:  Cannot redeclare lwTableExists() (previously declared in C:\wamp64\www\learnwise\includes\db.php:11) in C:\wamp64\www\learnwise\includes\db.php on line 11
+[09-Jun-2026 12:30:13 UTC] PHP Stack trace:
+[09-Jun-2026 12:30:13 UTC] PHP   1. {main}() C:\wamp64\www\learnwise\tools\verify-fixes.php:0
+[09-Jun-2026 12:30:13 UTC] [LearnWise] Fatal error [64] Cannot redeclare lwTableExists() (previously declared in C:\wamp64\www\learnwise\includes\db.php:11) in C:\wamp64\www\learnwise\includes\db.php:11
+[09-Jun-2026 12:30:28 UTC] [LearnWise] Error in C:\wamp64\www\learnwise\tools\verify-fixes.php:9 | Call to undefined function refreshSettingsCache()
