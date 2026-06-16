@@ -15,3 +15,5 @@
 [09-Jun-2026 12:30:13 UTC] PHP   1. {main}() C:\wamp64\www\learnwise\tools\verify-fixes.php:0
 [09-Jun-2026 12:30:13 UTC] [LearnWise] Fatal error [64] Cannot redeclare lwTableExists() (previously declared in C:\wamp64\www\learnwise\includes\db.php:11) in C:\wamp64\www\learnwise\includes\db.php:11
 [09-Jun-2026 12:30:28 UTC] [LearnWise] Error in C:\wamp64\www\learnwise\tools\verify-fixes.php:9 | Call to undefined function refreshSettingsCache()
+[16-Jun-2026 16:29:20 UTC] [LearnWise] ParseError in C:\wamp64\www\learnwise\includes\navbar.php:38 | syntax error, unexpected end of file, expecting "elseif" or "else" or "endif"
+[16-Jun-2026 16:29:23 UTC] [LearnWise] ParseError in C:\wamp64\www\learnwise\includes\navbar.php:38 | syntax error, unexpected end of file, expecting "elseif" or "else" or "endif"

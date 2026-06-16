@@ -4,11 +4,11 @@ $pageDescription = $pageDescription ?? getSetting('site_tagline', 'Premium onlin
 $pageOgImage = $pageOgImage ?? getSiteLogo();
 $bodyClass = trim(($bodyClass ?? '') . ' page-' . preg_replace('/[^a-z0-9_-]+/i', '-', (string) ($currentPage ?? 'site')));
 $favicon = getSetting('favicon', getSiteLogo());
-$scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-$canonicalUrl = $scheme . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . ($_SERVER['SCRIPT_NAME'] ?? '/index.php');
-$scriptDir = str_replace('\\', '/', dirname((string) ($_SERVER['SCRIPT_NAME'] ?? '')));
-$appBase = ($scriptDir === '/' || $scriptDir === '.' || $scriptDir === '') ? '' : rtrim($scriptDir, '/');
-$appUrl = $scheme . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . ($appBase !== '' ? $appBase : '');
+$appUrl = lwGetAppUrl();
+$canonicalUrl = $appUrl . '/' . ltrim(basename((string) ($_SERVER['SCRIPT_NAME'] ?? 'index.php')), '/');
+if (basename((string) ($_SERVER['SCRIPT_NAME'] ?? '')) === 'index.php') {
+    $canonicalUrl = $appUrl;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">

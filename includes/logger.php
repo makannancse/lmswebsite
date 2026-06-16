@@ -26,3 +26,8 @@ function lwLogEmail(array $entry): void
 {
     lwLogToFile('email.log', $entry);
 }
+
+function lwLogAdminLogin(array $entry): void
+{
+    lwLogToFile('admin_login_debug.log', $entry);
+}

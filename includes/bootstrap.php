@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/app.php';
+
 function lwRuntimePath(string $path = ''): string
 {
     $basePath = dirname(__DIR__) . '/logs';
@@ -148,12 +150,7 @@ function lwBootstrapApplication(): void
     set_exception_handler('lwHandleUncaughtException');
     register_shutdown_function('lwHandleShutdown');
 
-    if (session_status() === PHP_SESSION_NONE) {
-        ini_set('session.save_path', lwRuntimePath('sessions'));
-        @session_start();
-    }
-
-    if (!isset($_SESSION) || !is_array($_SESSION)) {
-        $_SESSION = [];
+    if (!lwStartSession()) {
+        lwLogRuntimeMessage('Session could not be started. Check logs/admin_login_debug.log and logs/sessions permissions.');
     }
 }

@@ -1,4 +1,6 @@
 <?php
+ob_start();
+
 require_once __DIR__ . '/auth.php';
 
 if (isset($_GET['logout'])) {
@@ -6,27 +8,42 @@ if (isset($_GET['logout'])) {
 }
 
 if (isAdminLoggedIn()) {
-    header('Location: dashboard.php');
-    exit;
+    lwRedirect(lwAdminUrl('dashboard.php'));
 }
 
 $error = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = trim($_POST['email'] ?? '');
-    $password = trim($_POST['password'] ?? '');
+$notice = '';
 
-    if ($email === '' || $password === '') {
-        $error = 'Please enter both email and password.';
-    } else {
-        $admin = getAdminByEmail($pdo, $email);
-        if ($admin && password_verify($password, $admin['password'])) {
-            adminLogin($admin['email']);
-            header('Location: dashboard.php');
-            exit;
-        }
-        $error = 'Invalid login credentials.';
-    }
+if (!empty($_GET['session_expired'])) {
+    $notice = 'Your session expired. Please sign in again.';
 }
+
+if (!empty($_GET['logged_out'])) {
+    $notice = 'You have been logged out successfully.';
+}
+
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
+    $result = lwAttemptAdminLogin($pdo, (string) ($_POST['email'] ?? ''), (string) ($_POST['password'] ?? ''));
+
+    lwLogAdminLogin([
+        'event' => 'login_result',
+        'success' => $result['success'],
+        'reason' => $result['reason'] ?? '',
+        'redirect' => $result['redirect'] ?? '',
+        'session_id_after' => session_id(),
+    ]);
+
+    if (!empty($result['success'])) {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
+        lwRedirect((string) ($result['redirect'] ?? lwAdminUrl('dashboard.php')));
+    }
+
+    $error = (string) ($result['message'] ?? 'Authentication failed.');
+}
+
+$postedEmail = htmlspecialchars((string) ($_POST['email'] ?? ''), ENT_QUOTES, 'UTF-8');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -53,13 +70,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <h3 class="mb-1">LearnWise Admin</h3>
                 <p class="text-muted">Sign in to manage the website content.</p>
             </div>
-            <?php if ($error): ?>
+
+            <?php if ($notice !== ''): ?>
+                <div class="alert alert-info"><?= htmlspecialchars($notice) ?></div>
+            <?php endif; ?>
+
+            <?php if ($error !== ''): ?>
                 <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
             <?php endif; ?>
-            <form method="post">
+
+            <form method="post" action="<?= htmlspecialchars(lwAdminUrl('login.php')) ?>" autocomplete="off">
                 <div class="mb-3">
                     <label for="email" class="form-label">Email</label>
-                    <input type="email" id="email" name="email" class="form-control" value="<?= htmlspecialchars($_POST['email'] ?? '') ?>" required>
+                    <input type="email" id="email" name="email" class="form-control" value="<?= $postedEmail ?>" required autofocus>
                 </div>
                 <div class="mb-4">
                     <label for="password" class="form-label">Password</label>
@@ -70,5 +93,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    <?php if ($error !== ''): ?>
+    Swal.fire({
+        icon: 'error',
+        title: 'Login Failed',
+        text: <?= json_encode($error, JSON_UNESCAPED_UNICODE) ?>,
+        confirmButtonColor: '#1E73BE'
+    });
+    <?php elseif ($notice !== ''): ?>
+    Swal.fire({
+        icon: 'info',
+        title: 'Notice',
+        text: <?= json_encode($notice, JSON_UNESCAPED_UNICODE) ?>,
+        confirmButtonColor: '#1E73BE'
+    });
+    <?php endif; ?>
+});
+</script>
 </body>
 </html>

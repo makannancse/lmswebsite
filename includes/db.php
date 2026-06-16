@@ -3,10 +3,26 @@ require_once __DIR__ . '/bootstrap.php';
 
 lwBootstrapApplication();
 
-$dbHost = '127.0.0.1';
-$dbName = 'learnwise';
-$dbUser = 'root';
-$dbPass = '';
+$localConfig = [];
+$configFile = __DIR__ . '/config.local.php';
+if (is_file($configFile)) {
+    $loaded = require $configFile;
+    if (is_array($loaded)) {
+        $localConfig = $loaded;
+    }
+}
+
+if (!empty($localConfig['app_url'])) {
+    define('LW_APP_URL', rtrim((string) $localConfig['app_url'], '/'));
+}
+if (!empty($localConfig['app_base_path'])) {
+    define('LW_APP_BASE_PATH', (string) $localConfig['app_base_path']);
+}
+
+$dbHost = (string) ($localConfig['db_host'] ?? '127.0.0.1');
+$dbName = (string) ($localConfig['db_name'] ?? 'learnwise');
+$dbUser = (string) ($localConfig['db_user'] ?? 'root');
+$dbPass = (string) ($localConfig['db_pass'] ?? '');
 
 function lwTableExists(PDO $pdo, string $table): bool
 {
@@ -628,17 +644,17 @@ function lwInitializeDatabase(PDO $pdo): void
             'sort_order' => 8,
             'status' => 'active',
         ],
-        [
-            'section_key' => 'teachers_showcase',
-            'section_title' => 'Meet our expert teachers',
-            'section_subtitle' => 'Passionate educators committed to helping every student succeed.',
-            'section_content' => '',
-            'section_image' => '',
-            'section_type' => 'teachers_grid',
-            'section_settings' => json_encode(['kicker' => 'Our Faculty', 'surface' => 'section-muted'], JSON_UNESCAPED_SLASHES),
-            'sort_order' => 9,
-            'status' => 'active',
-        ],
+        // [
+        //     'section_key' => 'teachers_showcase',
+        //     'section_title' => 'Meet our expert teachers',
+        //     'section_subtitle' => 'Passionate educators committed to helping every student succeed.',
+        //     'section_content' => '',
+        //     'section_image' => '',
+        //     'section_type' => 'teachers_grid',
+        //     'section_settings' => json_encode(['kicker' => 'Our Faculty', 'surface' => 'section-muted'], JSON_UNESCAPED_SLASHES),
+        //     'sort_order' => 9,
+        //     'status' => 'active',
+        // ],
         [
             'section_key' => 'faq',
             'section_title' => 'Frequently asked questions',
