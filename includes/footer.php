@@ -2,7 +2,7 @@
 $year = date('Y');
 $footerMenus = getMenus();
 $socialLinks = getSocialLinks();
-$footerLogo = getSiteLogo();
+$footerLogo = getDisplayLogo();
 $privacyLink = getSetting('footer_legal_privacy', 'privacy.php');
 $termsLink = getSetting('footer_legal_terms', 'terms.php');
 ?>
@@ -12,11 +12,10 @@ $termsLink = getSetting('footer_legal_terms', 'terms.php');
             <div class="col-lg-4 col-md-6">
                 <div class="d-flex align-items-center gap-3 mb-3">
                     <?php if ($footerLogo !== ''): ?>
-                        <img src="<?= htmlspecialchars($footerLogo) ?>" alt="<?= htmlspecialchars(getSetting('site_name', 'LearnWise')) ?> logo" class="nav-logo" loading="lazy" width="42" height="42">
+                        <img src="<?= htmlspecialchars($footerLogo) ?>" alt="<?= htmlspecialchars(getSetting('site_name', 'LearnWise')) ?> logo" class="footer-logo" loading="lazy" width="190" height="65">
                     <?php else: ?>
                         <span class="brand-mark">LW</span>
                     <?php endif; ?>
-                    <h5 class="footer-title mb-0"><?= htmlspecialchars(getSetting('site_name', 'LearnWise')) ?></h5>
                 </div>
                 <p><?= htmlspecialchars(getSetting('footer_text', 'Premium online learning with expert teachers, flexible schedules, and parent-friendly progress tracking.')) ?></p>
             </div>

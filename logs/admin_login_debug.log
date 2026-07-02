@@ -8,3 +8,8 @@
 {"event":"login_session_created","email":"admin@learnwise.com","session_id":"jlffa37dd51vifcjq9rt1opit2","session_save_path":"C:\\wamp64\\www\\learnwise/logs/sessions","cookie_path":"/learnwise/","cookie_secure":false,"session_data":{"admin_logged_in":true,"admin_email":"admin@learnwise.com"},"logged_at":"2026-06-16T16:24:22+00:00"}
 {"event":"login_result","success":true,"reason":"","redirect":"http://localhost/learnwise/admin/dashboard.php","session_id_after":"jlffa37dd51vifcjq9rt1opit2","logged_at":"2026-06-16T16:24:22+00:00"}
 {"event":"logout","email":"admin@learnwise.com","session_id":"jlffa37dd51vifcjq9rt1opit2","logged_at":"2026-06-16T16:24:32+00:00"}
+{"event":"login_attempt","method":"POST","email":"admin@learnwise.com","post_keys":["email","password"],"session_id_before":"87fld2qa8gmf5gc60pvdsv3gvj","app_url":"http://localhost/learnwise","app_base_path":"/learnwise","logged_at":"2026-07-02T13:53:01+00:00"}
+{"event":"admin_lookup","email":"admin@learnwise.com","user_found":true,"user_id":1,"logged_at":"2026-07-02T13:53:01+00:00"}
+{"event":"password_verify","email":"admin@learnwise.com","valid":true,"logged_at":"2026-07-02T13:53:01+00:00"}
+{"event":"login_session_created","email":"admin@learnwise.com","session_id":"d5qrqruqqpba32tdp1mofhd8e6","session_save_path":"C:\\wamp64\\www\\learnwise/logs/sessions","cookie_path":"/learnwise/","cookie_secure":false,"session_data":{"admin_logged_in":true,"admin_email":"admin@learnwise.com"},"logged_at":"2026-07-02T13:53:01+00:00"}
+{"event":"login_result","success":true,"reason":"","redirect":"http://localhost/learnwise/admin/dashboard.php","session_id_after":"d5qrqruqqpba32tdp1mofhd8e6","logged_at":"2026-07-02T13:53:01+00:00"}

@@ -1167,12 +1167,12 @@ function lwInitializeDatabase(PDO $pdo): void
 
     if ((int) $pdo->query('SELECT COUNT(*) FROM courses')->fetchColumn() === 0) {
         $defaultCourses = [
-            ['title' => 'Mathematics Mastery', 'description' => 'From fundamentals to advanced problem solving with personalized support for every grade level.', 'category' => 'mathematics', 'image' => '', 'sort_order' => 1, 'status' => 'active'],
-            ['title' => 'Science Explorer', 'description' => 'Interactive physics, chemistry, and biology lessons with experiments and concept mastery.', 'category' => 'science', 'image' => '', 'sort_order' => 2, 'status' => 'active'],
-            ['title' => 'Coding & Technology', 'description' => 'Build real programming skills through live projects, logic building, and creative problem solving.', 'category' => 'coding', 'image' => '', 'sort_order' => 3, 'status' => 'active'],
-            ['title' => 'Languages & Communication', 'description' => 'Develop fluency in English and world languages through speaking, writing, and comprehension practice.', 'category' => 'languages', 'image' => '', 'sort_order' => 4, 'status' => 'active'],
-            ['title' => 'Creative Arts', 'description' => 'Explore drawing, design, and creative expression with guided projects and skill development.', 'category' => 'arts', 'image' => '', 'sort_order' => 5, 'status' => 'active'],
-            ['title' => 'Test Preparation', 'description' => 'Focused coaching for school exams, board tests, and competitive entrance preparation.', 'category' => 'test prep', 'image' => '', 'sort_order' => 6, 'status' => 'active'],
+            ['title' => 'Mathematics Mastery', 'description' => 'From fundamentals to advanced problem solving with personalized support for every grade level.', 'category' => 'mathematics', 'image' => 'assets/images/programmes/mathematics.webp', 'sort_order' => 1, 'status' => 'active'],
+            ['title' => 'Science Explorer', 'description' => 'Interactive physics, chemistry, and biology lessons with experiments and concept mastery.', 'category' => 'science', 'image' => 'assets/images/programmes/science.webp', 'sort_order' => 2, 'status' => 'active'],
+            ['title' => 'Coding & Technology', 'description' => 'Build real programming skills through live projects, logic building, and creative problem solving.', 'category' => 'coding', 'image' => 'assets/images/programmes/coding.webp', 'sort_order' => 3, 'status' => 'active'],
+            ['title' => 'Languages & Communication', 'description' => 'Develop fluency in English and world languages through speaking, writing, and comprehension practice.', 'category' => 'languages', 'image' => 'assets/images/programmes/languages.webp', 'sort_order' => 4, 'status' => 'active'],
+            ['title' => 'Creative Arts', 'description' => 'Explore drawing, design, and creative expression with guided projects and skill development.', 'category' => 'arts', 'image' => 'assets/images/programmes/arts-creativity.webp', 'sort_order' => 5, 'status' => 'active'],
+            ['title' => 'Test Preparation', 'description' => 'Focused coaching for school exams, board tests, and competitive entrance preparation.', 'category' => 'test prep', 'image' => 'assets/images/programmes/test-preparation.webp', 'sort_order' => 6, 'status' => 'active'],
         ];
         $insertCourse = $pdo->prepare('
             INSERT INTO courses (title, description, category, image, sort_order, status)

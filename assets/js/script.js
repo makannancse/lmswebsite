@@ -280,11 +280,29 @@
                     return;
                 }
 
-                let embedSrc = src;
-                if (src.includes('youtube.com/watch?v=')) {
-                    embedSrc = src.replace('watch?v=', 'embed/');
-                } else if (src.includes('youtu.be/')) {
-                    embedSrc = src.replace('youtu.be/', 'youtube.com/embed/');
+                let embedSrc = src.trim();
+                try {
+                    const parsedUrl = new URL(embedSrc, window.location.href);
+                    const host = parsedUrl.hostname.replace(/^www\./, '');
+
+                    if (host === 'youtube.com' || host === 'm.youtube.com') {
+                        const videoId = parsedUrl.searchParams.get('v') || parsedUrl.pathname.replace(/^\/(embed|shorts)\//, '').split('/')[0];
+                        if (videoId) {
+                            embedSrc = 'https://www.youtube.com/embed/' + videoId;
+                        }
+                    } else if (host === 'youtu.be') {
+                        const videoId = parsedUrl.pathname.replace(/^\//, '').split('/')[0];
+                        if (videoId) {
+                            embedSrc = 'https://www.youtube.com/embed/' + videoId;
+                        }
+                    } else if (host === 'vimeo.com') {
+                        const videoId = parsedUrl.pathname.replace(/^\//, '').split('/')[0];
+                        if (videoId) {
+                            embedSrc = 'https://player.vimeo.com/video/' + videoId;
+                        }
+                    }
+                } catch (error) {
+                    embedSrc = src;
                 }
 
                 if (embedSrc.includes('youtube.com/embed/') && !embedSrc.includes('?')) {

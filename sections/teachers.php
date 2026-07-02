@@ -12,16 +12,19 @@
             <?php
             $teachers = getTeachers();
             foreach ($teachers as $teacher):
+                $teacherPhoto = getTeacherPhotoUrl($teacher);
             ?>
                 <div class="col-lg-3 col-md-6">
                     <div class="teacher-card card border-0 shadow-sm h-100">
                         <div class="card-body text-center p-4">
                             <div class="teacher-avatar mb-3">
-                                <img src="<?= htmlspecialchars($teacher['image'] ?: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80') ?>" alt="<?= htmlspecialchars($teacher['name']) ?>" class="rounded-circle" width="100" height="100" loading="lazy">
+                                <img src="<?= htmlspecialchars($teacherPhoto) ?>" alt="<?= htmlspecialchars($teacher['name']) ?>" class="teacher-photo rounded-circle" width="104" height="104" loading="lazy" decoding="async">
                             </div>
                             <h5 class="card-title fw-bold text-primary mb-1"><?= htmlspecialchars($teacher['name']) ?></h5>
                             <p class="text-muted small mb-2"><?= htmlspecialchars($teacher['subject']) ?></p>
-                            <p class="card-text small text-muted mb-3"><?= htmlspecialchars($teacher['bio']) ?></p>
+                            <?php if (!empty($teacher['bio'])): ?>
+                                <p class="card-text small text-muted mb-3"><?= htmlspecialchars($teacher['bio']) ?></p>
+                            <?php endif; ?>
                             <div class="teacher-stats">
                                 <div class="row g-2">
                                     <div class="col-6">

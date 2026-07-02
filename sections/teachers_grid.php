@@ -16,11 +16,12 @@ $sectionClass = trim((string) ($teacherSettings['surface'] ?? 'section-surface')
 
         <div class="row g-4">
             <?php foreach ($teachers as $teacher): ?>
+                <?php $teacherPhoto = getTeacherPhotoUrl($teacher); ?>
                 <div class="col-lg-4 col-md-6">
                     <article class="card teacher-showcase-card h-100 border-0">
                         <div class="teacher-showcase-header">
                             <div class="teacher-showcase-avatar">
-                                <img src="<?= htmlspecialchars($teacher['image'] ?: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80') ?>" alt="<?= htmlspecialchars($teacher['name']) ?>" width="120" height="120" loading="lazy" decoding="async">
+                                <img src="<?= htmlspecialchars($teacherPhoto) ?>" alt="<?= htmlspecialchars($teacher['name']) ?>" width="120" height="120" loading="lazy" decoding="async">
                             </div>
                             <div class="teacher-showcase-badge">
                                 <i class="bi bi-patch-check-fill"></i>

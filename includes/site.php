@@ -37,6 +37,27 @@ function getSiteLogo(): string
     return getSetting('site_logo', getSetting('logo'));
 }
 
+function getDisplayLogo(): string
+{
+    $displayLogo = 'assets/images/learnwise-logo-display.png';
+    if (is_file(dirname(__DIR__) . '/' . $displayLogo)) {
+        return $displayLogo;
+    }
+
+    return getSiteLogo();
+}
+
+function getTeacherPlaceholderImage(): string
+{
+    return 'assets/images/teacher-placeholder.svg';
+}
+
+function getTeacherPhotoUrl(array $teacher): string
+{
+    $image = trim((string) ($teacher['image'] ?? ''));
+    return $image !== '' ? $image : getTeacherPlaceholderImage();
+}
+
 function refreshSettingsCache(): void
 {
     global $lwSettingsCache;
@@ -441,6 +462,88 @@ function cmsUploadFile(
     return 'uploads/' . trim($targetFolder, '/') . '/' . $filename;
 }
 
+function lwOptimizeUploadedImage(string $relativePath, int $maxWidth = 900, int $maxHeight = 900, int $quality = 82): void
+{
+    if (!function_exists('imagecreatetruecolor')) {
+        return;
+    }
+
+    $relativePath = ltrim(str_replace('\\', '/', trim($relativePath)), '/');
+    if ($relativePath === '') {
+        return;
+    }
+
+    $projectRoot = realpath(dirname(__DIR__));
+    $absolutePath = realpath(dirname(__DIR__) . '/' . $relativePath);
+    if ($projectRoot === false || $absolutePath === false) {
+        return;
+    }
+
+    $projectRoot = rtrim($projectRoot, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+    if (strpos($absolutePath, $projectRoot) !== 0 || !is_file($absolutePath)) {
+        return;
+    }
+
+    $info = @getimagesize($absolutePath);
+    if ($info === false || empty($info[0]) || empty($info[1])) {
+        return;
+    }
+
+    [$width, $height] = $info;
+    $mime = (string) ($info['mime'] ?? '');
+
+    switch ($mime) {
+        case 'image/jpeg':
+            $source = @imagecreatefromjpeg($absolutePath);
+            break;
+        case 'image/png':
+            $source = @imagecreatefrompng($absolutePath);
+            break;
+        case 'image/webp':
+            if (!function_exists('imagecreatefromwebp')) {
+                return;
+            }
+            $source = @imagecreatefromwebp($absolutePath);
+            break;
+        default:
+            return;
+    }
+
+    if (!$source) {
+        return;
+    }
+
+    $scale = min(1, $maxWidth / $width, $maxHeight / $height);
+    $targetWidth = max(1, (int) round($width * $scale));
+    $targetHeight = max(1, (int) round($height * $scale));
+
+    $canvas = imagecreatetruecolor($targetWidth, $targetHeight);
+    if (!$canvas) {
+        imagedestroy($source);
+        return;
+    }
+
+    if ($mime === 'image/png' || $mime === 'image/webp') {
+        imagealphablending($canvas, false);
+        imagesavealpha($canvas, true);
+        $transparent = imagecolorallocatealpha($canvas, 0, 0, 0, 127);
+        imagefilledrectangle($canvas, 0, 0, $targetWidth, $targetHeight, $transparent);
+    }
+
+    imagecopyresampled($canvas, $source, 0, 0, 0, 0, $targetWidth, $targetHeight, $width, $height);
+
+    if ($mime === 'image/jpeg') {
+        @imagejpeg($canvas, $absolutePath, $quality);
+    } elseif ($mime === 'image/png') {
+        @imagepng($canvas, $absolutePath, 7);
+    } elseif ($mime === 'image/webp' && function_exists('imagewebp')) {
+        @imagewebp($canvas, $absolutePath, $quality);
+    }
+
+    imagedestroy($source);
+    imagedestroy($canvas);
+}
+
 function getPageMeta(string $pageName): array
 {
     $page = getPage($pageName);
@@ -481,6 +584,23 @@ function getSectionKicker(array $section, string $default = 'LearnWise'): string
 function getCourseCategoryMeta(string $category): array
 {
     $key = strtolower(trim($category));
+    $programmeImages = [
+        'math' => 'assets/images/programmes/mathematics.webp',
+        'mathematics' => 'assets/images/programmes/mathematics.webp',
+        'science' => 'assets/images/programmes/science.webp',
+        'coding' => 'assets/images/programmes/coding.webp',
+        'languages' => 'assets/images/programmes/languages.webp',
+        'language' => 'assets/images/programmes/languages.webp',
+        'arts' => 'assets/images/programmes/arts-creativity.webp',
+        'art' => 'assets/images/programmes/arts-creativity.webp',
+        'arts & creativity' => 'assets/images/programmes/arts-creativity.webp',
+        'creative arts' => 'assets/images/programmes/arts-creativity.webp',
+        'test prep' => 'assets/images/programmes/test-preparation.webp',
+        'test preparation' => 'assets/images/programmes/test-preparation.webp',
+        'test_preparation' => 'assets/images/programmes/test-preparation.webp',
+        'test-preparation' => 'assets/images/programmes/test-preparation.webp',
+        'testprep' => 'assets/images/programmes/test-preparation.webp',
+    ];
     $map = [
         'math' => ['label' => 'Mathematics', 'icon' => 'bi-calculator', 'gradient' => 'course-math'],
         'mathematics' => ['label' => 'Mathematics', 'icon' => 'bi-calculator', 'gradient' => 'course-math'],
@@ -488,15 +608,39 @@ function getCourseCategoryMeta(string $category): array
         'coding' => ['label' => 'Coding', 'icon' => 'bi-code-slash', 'gradient' => 'course-coding'],
         'languages' => ['label' => 'Languages', 'icon' => 'bi-translate', 'gradient' => 'course-languages'],
         'language' => ['label' => 'Languages', 'icon' => 'bi-translate', 'gradient' => 'course-languages'],
-        'arts' => ['label' => 'Arts', 'icon' => 'bi-palette', 'gradient' => 'course-arts'],
+        'arts' => ['label' => 'Arts & Creativity', 'icon' => 'bi-palette', 'gradient' => 'course-arts'],
+        'art' => ['label' => 'Arts & Creativity', 'icon' => 'bi-palette', 'gradient' => 'course-arts'],
+        'arts & creativity' => ['label' => 'Arts & Creativity', 'icon' => 'bi-palette', 'gradient' => 'course-arts'],
+        'creative arts' => ['label' => 'Arts & Creativity', 'icon' => 'bi-palette', 'gradient' => 'course-arts'],
         'test prep' => ['label' => 'Test Preparation', 'icon' => 'bi-trophy', 'gradient' => 'course-testprep'],
+        'test preparation' => ['label' => 'Test Preparation', 'icon' => 'bi-trophy', 'gradient' => 'course-testprep'],
         'test_preparation' => ['label' => 'Test Preparation', 'icon' => 'bi-trophy', 'gradient' => 'course-testprep'],
+        'test-preparation' => ['label' => 'Test Preparation', 'icon' => 'bi-trophy', 'gradient' => 'course-testprep'],
         'testprep' => ['label' => 'Test Preparation', 'icon' => 'bi-trophy', 'gradient' => 'course-testprep'],
     ];
 
-    return $map[$key] ?? [
+    $meta = $map[$key] ?? [
         'label' => ucwords(str_replace(['_', '-'], ' ', $category)),
         'icon' => 'bi-book',
         'gradient' => 'course-default',
     ];
+
+    $meta['image'] = $programmeImages[$key] ?? 'assets/images/programmes/mathematics.webp';
+    return $meta;
+}
+
+function getCourseImageUrl(array $course): string
+{
+    $image = trim((string) ($course['image'] ?? ''));
+    if ($image !== '') {
+        return $image;
+    }
+
+    $category = trim((string) ($course['category'] ?? ''));
+    if ($category === '') {
+        $category = trim((string) ($course['title'] ?? ''));
+    }
+
+    $meta = getCourseCategoryMeta($category);
+    return $meta['image'];
 }

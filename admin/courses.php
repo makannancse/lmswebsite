@@ -5,7 +5,7 @@ requireAdminLogin();
 $pageTitle = 'Courses';
 $message = '';
 $courseId = null;
-$categories = ['Coding', 'Math', 'Science', 'Languages', 'Arts'];
+$categories = ['Mathematics', 'Science', 'Coding', 'Languages', 'Arts & Creativity', 'Test Preparation'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $courseId = isset($_POST['course_id']) ? (int) $_POST['course_id'] : null;

@@ -100,11 +100,12 @@ CREATE TABLE IF NOT EXISTS `courses` (
 --
 
 INSERT INTO `courses` (`id`, `title`, `description`, `category`, `image`, `status`, `created_at`, `sort_order`, `updated_at`) VALUES
-(1, 'Full Stack Coding Bootcamp', 'Real-time coding sessions with project support.', 'coding', '', 'active', '2026-05-10 06:45:04', 1, '2026-05-10 06:45:04'),
-(2, 'Advanced Mathematics', 'Complete coverage for school and competition preparation.', 'math', '', 'active', '2026-05-10 06:45:04', 2, '2026-05-10 06:45:04'),
-(3, 'STEM Science Lab', 'Live experiments, concepts, and guided problem solving.', 'science', '', 'active', '2026-05-10 06:45:04', 3, '2026-05-10 06:45:04'),
-(4, 'English Communication', 'Interactive speaking and writing practice.', 'languages', '', 'active', '2026-05-10 06:45:04', 4, '2026-05-10 06:45:04'),
-(5, 'Dance Class', 'Join our dynamic dance classes and master new moves with expert guidance. Perfect for beginners and advanced learners looking to grow their passion for dance.', 'Arts', '', 'active', '2026-06-09 14:06:47', 0, '2026-06-09 14:06:47');
+(1, 'Full Stack Coding Bootcamp', 'Real-time coding sessions with project support.', 'coding', 'assets/images/programmes/coding.webp', 'active', '2026-05-10 06:45:04', 1, '2026-05-10 06:45:04'),
+(2, 'Advanced Mathematics', 'Complete coverage for school and competition preparation.', 'mathematics', 'assets/images/programmes/mathematics.webp', 'active', '2026-05-10 06:45:04', 2, '2026-05-10 06:45:04'),
+(3, 'STEM Science Lab', 'Live experiments, concepts, and guided problem solving.', 'science', 'assets/images/programmes/science.webp', 'active', '2026-05-10 06:45:04', 3, '2026-05-10 06:45:04'),
+(4, 'English Communication', 'Interactive speaking and writing practice.', 'languages', 'assets/images/programmes/languages.webp', 'active', '2026-05-10 06:45:04', 4, '2026-05-10 06:45:04'),
+(5, 'Arts & Creativity', 'Guided creative projects in visual arts, design, and expression.', 'arts & creativity', 'assets/images/programmes/arts-creativity.webp', 'active', '2026-06-09 14:06:47', 5, '2026-06-09 14:06:47'),
+(6, 'Test Preparation', 'Focused coaching for school exams, board tests, and competitive entrance preparation.', 'test preparation', 'assets/images/programmes/test-preparation.webp', 'active', '2026-06-09 14:06:47', 6, '2026-06-09 14:06:47');
 
 -- --------------------------------------------------------
 

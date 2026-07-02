@@ -18,17 +18,14 @@ $sectionClass = trim((string) ($courseSettings['surface'] ?? 'section-muted'));
 
         <div class="row g-4">
             <?php foreach ($courses as $course): ?>
-                <?php $meta = getCourseCategoryMeta((string) $course['category']); ?>
+                <?php
+                $meta = getCourseCategoryMeta((string) $course['category']);
+                $courseImage = getCourseImageUrl($course);
+                ?>
                 <div class="col-md-6 col-xl-4">
                     <article class="card course-category-card h-100 border-0">
                         <div class="course-category-visual <?= htmlspecialchars($meta['gradient']) ?>">
-                            <?php if (!empty($course['image'])): ?>
-                                <img src="<?= htmlspecialchars($course['image']) ?>" alt="<?= htmlspecialchars($course['title']) ?>" class="course-category-image" loading="lazy" decoding="async">
-                            <?php else: ?>
-                                <div class="course-category-icon">
-                                    <i class="bi <?= htmlspecialchars($meta['icon']) ?>"></i>
-                                </div>
-                            <?php endif; ?>
+                            <img src="<?= htmlspecialchars($courseImage) ?>" alt="<?= htmlspecialchars($course['title']) ?>" class="course-category-image" loading="lazy" decoding="async" width="640" height="426">
                         </div>
                         <div class="card-body p-4 d-flex flex-column">
                             <span class="course-category-label"><?= htmlspecialchars($meta['label']) ?></span>

@@ -1,5 +1,9 @@
 <?php
+require_once __DIR__ . '/../includes/site.php';
+
 $pageTitle = $pageTitle ?? 'Admin Dashboard | LearnWise';
+$adminSiteName = getSetting('site_name', 'LearnWise');
+$adminLogo = getDisplayLogo();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -20,6 +24,7 @@ $pageTitle = $pageTitle ?? 'Admin Dashboard | LearnWise';
         .admin-sidebar .nav-link.active, .admin-sidebar .nav-link:hover { color: #1e73be; }
         .admin-topbar { background: #fff; border-bottom: 1px solid #e7ebf4; }
         .admin-card { border-radius: 24px; box-shadow: 0 18px 40px rgba(19, 44, 77, 0.08); border: none; }
+        .admin-sidebar-logo { width: min(190px, 100%); max-height: 68px; object-fit: contain; }
         .drag-handle { cursor: grab; }
         .table td, .table th { vertical-align: middle; }
     </style>
@@ -29,12 +34,12 @@ $pageTitle = $pageTitle ?? 'Admin Dashboard | LearnWise';
     <div class="row">
         <div class="col-lg-3 admin-sidebar p-4">
             <div class="mb-5">
-                <a href="dashboard.php" class="d-flex align-items-center gap-3 text-decoration-none mb-4">
-                    <div class="bg-primary text-white rounded-3 d-flex align-items-center justify-content-center" style="width:42px;height:42px;">LW</div>
-                    <div>
-                        <h5 class="mb-0">LearnWise CMS</h5>
-                        <small class="text-muted">Admin Panel</small>
-                    </div>
+                <a href="dashboard.php" class="d-inline-flex align-items-center text-decoration-none mb-4" aria-label="<?= htmlspecialchars($adminSiteName) ?> CMS dashboard">
+                    <?php if ($adminLogo !== ''): ?>
+                        <img src="../<?= htmlspecialchars($adminLogo) ?>" alt="<?= htmlspecialchars($adminSiteName) ?> logo" class="admin-sidebar-logo">
+                    <?php else: ?>
+                        <span class="bg-primary text-white rounded-3 d-inline-flex align-items-center justify-content-center fw-bold" style="width:54px;height:54px;">LW</span>
+                    <?php endif; ?>
                 </a>
             </div>
             <?php include __DIR__ . '/sidebar.php'; ?>

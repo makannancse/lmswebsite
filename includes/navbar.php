@@ -1,20 +1,19 @@
 <?php
 $currentPage = $currentPage ?? '';
 $menuItems = getMenus();
-$logo = getSiteLogo();
+$logo = getDisplayLogo();
 $siteName = getSetting('site_name', 'LearnWise');
 $navCtaText = getSetting('nav_cta_text', 'Book Free Trial');
 $navCtaLink = getSetting('nav_cta_link', '#lead-form');
 ?>
 <nav class="navbar site-navbar navbar-expand-lg navbar-light sticky-top py-3">
     <div class="container">
-        <a class="navbar-brand d-flex align-items-center" href="index.php">
+        <a class="navbar-brand navbar-logo-link d-flex align-items-center" href="index.php" aria-label="<?= htmlspecialchars($siteName) ?> home">
             <?php if ($logo !== ''): ?>
-                <img src="<?= htmlspecialchars($logo) ?>" alt="<?= htmlspecialchars($siteName) ?> logo" class="nav-logo me-2" loading="eager" decoding="async" width="42" height="42">
+                <img src="<?= htmlspecialchars($logo) ?>" alt="<?= htmlspecialchars($siteName) ?> logo" class="nav-logo" loading="eager" decoding="async" width="176" height="60">
             <?php else: ?>
                 <span class="brand-mark">LW</span>
             <?php endif; ?>
-            <span class="ms-2 brand-title"><?= htmlspecialchars($siteName) ?></span>
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>

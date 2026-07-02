@@ -2,9 +2,10 @@
 $videoSettings = getSectionSettings($section);
 $videoModalId = 'videoModal-' . (int) ($section['id'] ?? 0);
 $contentItems = parseStructuredLines($section['content'] ?? '', 4);
+$useVideoLibrary = strtolower(trim((string) ($videoSettings['source'] ?? ''))) === 'sample_videos';
 $videos = [];
 
-if ($contentItems !== []) {
+if (!$useVideoLibrary && $contentItems !== []) {
     foreach ($contentItems as $item) {
         $videos[] = [
             'title' => trim((string) ($item[0] ?? '')),
