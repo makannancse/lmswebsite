@@ -62,18 +62,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'sort'
 }
 
 if (isset($_GET['delete'])) {
-    $video = lwFetchSampleVideo($pdo, (int) $_GET['delete']);
-    if ($video) {
-        lwDeleteUploadedMediaFile($video['thumbnail'] ?? '', ['thumbnails']);
-        lwDeleteUploadedMediaFile($video['video_file'] ?? '', ['videos']);
-        $stmt = $pdo->prepare('DELETE FROM sample_videos WHERE id = :id');
-        $stmt->execute([':id' => (int) $_GET['delete']]);
+    $deleteId = (int) $_GET['delete'];
+    $deleted = false;
+    $video = null;
+
+    try {
+        $pdo->beginTransaction();
+        $video = lwFetchSampleVideo($pdo, $deleteId);
+        if ($video) {
+            $stmt = $pdo->prepare('DELETE FROM sample_videos WHERE id = :id');
+            $stmt->execute([':id' => $deleteId]);
+            $deleted = $stmt->rowCount() === 1;
+        }
+
+        if ($deleted) {
+            $pdo->commit();
+            lwDeleteUploadedMediaFile($video['thumbnail'] ?? '', ['thumbnails']);
+            lwDeleteUploadedMediaFile($video['video_file'] ?? '', ['videos']);
+        } else {
+            $pdo->rollBack();
+        }
+    } catch (Throwable $exception) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        lwReportException($exception, ['area' => 'admin_sample_videos_delete', 'id' => $deleteId]);
     }
-    header('Location: sample_videos.php?deleted=1');
+
+    header('Location: sample_videos.php?' . ($deleted ? 'deleted=1' : 'delete_failed=1'));
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') !== 'sort') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') !== 'sort' && ($oversizedPostMessage = lwGetPostMaxSizeUploadError('admin_sample_videos')) !== null) {
+    $message = $oversizedPostMessage;
+    $messageType = 'danger';
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') !== 'sort') {
     $id = (int) ($_POST['id'] ?? 0);
     $current = $id > 0 ? lwFetchSampleVideo($pdo, $id) : null;
     $title = trim((string) ($_POST['title'] ?? ''));
@@ -85,8 +108,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') !== 'sort'
 
     $thumbnailError = null;
     $videoFileError = null;
-    $thumbnail = cmsUploadFile($_FILES['thumbnail'] ?? [], 'thumbnails', ['jpg', 'jpeg', 'png', 'webp'], 'thumb', 5 * 1024 * 1024, $thumbnailError);
-    $videoFile = cmsUploadFile($_FILES['video_file'] ?? [], 'videos', ['mp4', 'webm', 'ogg'], 'video', 50 * 1024 * 1024, $videoFileError);
+    $thumbnail = cmsUploadFile($_FILES['thumbnail'] ?? [], 'thumbnails', ['jpg', 'jpeg', 'png', 'webp'], 'thumb', 5 * 1024 * 1024, $thumbnailError, 'thumbnail');
+    $videoFile = cmsUploadFile($_FILES['video_file'] ?? [], 'videos', ['mp4', 'webm', 'ogg'], 'video', 50 * 1024 * 1024, $videoFileError, 'video_file');
 
     if ($title === '') {
         $message = 'Please enter a video title.';
@@ -201,6 +224,7 @@ include __DIR__ . '/admin-header.php';
 <?php if (!empty($_GET['saved'])): ?><div class="alert alert-success">Video saved successfully.</div><?php endif; ?>
 <?php if (!empty($_GET['updated'])): ?><div class="alert alert-success">Video updated successfully.</div><?php endif; ?>
 <?php if (!empty($_GET['deleted'])): ?><div class="alert alert-success">Video deleted successfully.</div><?php endif; ?>
+<?php if (!empty($_GET['delete_failed'])): ?><div class="alert alert-danger">Video could not be deleted. It may have already been removed.</div><?php endif; ?>
 <?php if ($message !== ''): ?><div class="alert alert-<?= htmlspecialchars($messageType) ?>"><?= htmlspecialchars($message) ?></div><?php endif; ?>
 <div class="row g-4">
     <div class="col-xl-5">

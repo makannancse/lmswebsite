@@ -390,16 +390,155 @@ function buildWhatsappLink(): string
     return $number !== '' ? 'https://wa.me/' . $number : '#';
 }
 
+function lwIniSizeToBytes(string $size): int
+{
+    $size = trim($size);
+    if ($size === '') {
+        return 0;
+    }
+
+    $unit = strtolower($size[strlen($size) - 1]);
+    $value = (float) $size;
+
+    switch ($unit) {
+        case 'g':
+            $value *= 1024;
+            // no break
+        case 'm':
+            $value *= 1024;
+            // no break
+        case 'k':
+            $value *= 1024;
+            break;
+    }
+
+    return (int) round($value);
+}
+
+function lwFormatUploadBytes(int $bytes): string
+{
+    if ($bytes >= 1073741824) {
+        return rtrim(rtrim(number_format($bytes / 1073741824, 2), '0'), '.') . 'GB';
+    }
+    if ($bytes >= 1048576) {
+        return rtrim(rtrim(number_format($bytes / 1048576, 2), '0'), '.') . 'MB';
+    }
+    if ($bytes >= 1024) {
+        return rtrim(rtrim(number_format($bytes / 1024, 2), '0'), '.') . 'KB';
+    }
+
+    return $bytes . 'B';
+}
+
+function lwUploadLimits(): array
+{
+    return [
+        'file_uploads' => ini_get('file_uploads'),
+        'upload_max_filesize' => ini_get('upload_max_filesize'),
+        'post_max_size' => ini_get('post_max_size'),
+        'memory_limit' => ini_get('memory_limit'),
+        'max_file_uploads' => ini_get('max_file_uploads'),
+        'upload_tmp_dir' => ini_get('upload_tmp_dir') ?: sys_get_temp_dir(),
+    ];
+}
+
+function lwLogUploadEvent(string $event, array $entry = []): void
+{
+    $entry = array_merge([
+        'event' => $event,
+        'script' => (string) ($_SERVER['SCRIPT_NAME'] ?? ''),
+        'method' => (string) ($_SERVER['REQUEST_METHOD'] ?? ''),
+        'content_length' => (int) ($_SERVER['CONTENT_LENGTH'] ?? 0),
+        'limits' => lwUploadLimits(),
+    ], $entry);
+
+    if (function_exists('lwLogToFile')) {
+        lwLogToFile('uploads.log', $entry);
+        return;
+    }
+
+    if (function_exists('lwLogRuntimeMessage')) {
+        lwLogRuntimeMessage('Upload event: ' . json_encode($entry, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+    }
+}
+
+function lwUploadErrorMessage(int $uploadError): string
+{
+    switch ($uploadError) {
+        case UPLOAD_ERR_INI_SIZE:
+            return 'Upload failed because the file is larger than the server limit (' . ini_get('upload_max_filesize') . ').';
+        case UPLOAD_ERR_FORM_SIZE:
+            return 'Upload failed because the file is larger than the form limit.';
+        case UPLOAD_ERR_PARTIAL:
+            return 'Upload failed because the file was only partially uploaded.';
+        case UPLOAD_ERR_NO_TMP_DIR:
+            return 'Upload failed because the server temporary upload folder is missing.';
+        case UPLOAD_ERR_CANT_WRITE:
+            return 'Upload failed because the server could not write the temporary file.';
+        case UPLOAD_ERR_EXTENSION:
+            return 'Upload failed because a PHP extension blocked the file.';
+        default:
+            return 'Upload failed. Please try again.';
+    }
+}
+
+function lwRequestExceedsPostMaxSize(): bool
+{
+    if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? '')) !== 'POST') {
+        return false;
+    }
+
+    $contentLength = (int) ($_SERVER['CONTENT_LENGTH'] ?? 0);
+    $postMaxBytes = lwIniSizeToBytes((string) ini_get('post_max_size'));
+
+    return $postMaxBytes > 0 && $contentLength > $postMaxBytes;
+}
+
+function lwGetPostMaxSizeUploadError(string $area = ''): ?string
+{
+    if (!lwRequestExceedsPostMaxSize()) {
+        return null;
+    }
+
+    $postMaxBytes = lwIniSizeToBytes((string) ini_get('post_max_size'));
+    $message = 'Upload failed because the submitted form is larger than the server limit (' . ini_get('post_max_size') . ').';
+
+    lwLogUploadEvent('upload_failed', [
+        'area' => $area,
+        'reason' => 'post_max_size_exceeded',
+        'post_max_size_bytes' => $postMaxBytes,
+        'post_max_size_human' => lwFormatUploadBytes($postMaxBytes),
+        'message' => $message,
+    ]);
+
+    return $message;
+}
+
 function cmsUploadFile(
     array $file,
     string $targetFolder,
     array $allowedExtensions,
     string $prefix,
     int $maxSizeBytes = 5242880,
-    ?string &$errorMessage = null
+    ?string &$errorMessage = null,
+    string $fieldName = ''
 ): ?string
 {
     $errorMessage = null;
+    $targetFolder = trim(str_replace('\\', '/', $targetFolder), '/');
+    $allowedExtensions = array_values(array_unique(array_map('strtolower', $allowedExtensions)));
+    $originalName = (string) ($file['name'] ?? '');
+    $tmpName = (string) ($file['tmp_name'] ?? '');
+    $fileSize = (int) ($file['size'] ?? 0);
+    $uploadContext = [
+        'field' => $fieldName,
+        'target_folder' => $targetFolder,
+        'original_name' => $originalName,
+        'reported_size' => $fileSize,
+        'reported_size_human' => lwFormatUploadBytes($fileSize),
+        'tmp_name' => $tmpName,
+    ];
+
     $uploadError = (int) ($file['error'] ?? UPLOAD_ERR_NO_FILE);
 
     if ($uploadError === UPLOAD_ERR_NO_FILE) {
@@ -407,30 +546,56 @@ function cmsUploadFile(
     }
 
     if ($uploadError !== UPLOAD_ERR_OK) {
-        $errorMessage = 'Upload failed. Please try again.';
+        $errorMessage = lwUploadErrorMessage($uploadError);
+        lwLogUploadEvent('upload_failed', $uploadContext + [
+            'reason' => 'php_upload_error',
+            'upload_error_code' => $uploadError,
+            'message' => $errorMessage,
+        ]);
         return null;
     }
 
-    $fileSize = (int) ($file['size'] ?? 0);
     if ($maxSizeBytes > 0 && $fileSize > $maxSizeBytes) {
         $errorMessage = 'File too large. Maximum size is ' . number_format($maxSizeBytes / 1048576, 0) . 'MB.';
+        lwLogUploadEvent('upload_failed', $uploadContext + [
+            'reason' => 'app_max_size_exceeded',
+            'max_size_bytes' => $maxSizeBytes,
+            'max_size_human' => lwFormatUploadBytes($maxSizeBytes),
+            'message' => $errorMessage,
+        ]);
         return null;
     }
 
     $extension = strtolower(pathinfo((string) ($file['name'] ?? ''), PATHINFO_EXTENSION));
     if (!in_array($extension, $allowedExtensions, true)) {
         $errorMessage = 'Invalid file type. Please upload ' . implode(', ', $allowedExtensions) . ' only.';
+        lwLogUploadEvent('upload_failed', $uploadContext + [
+            'reason' => 'invalid_extension',
+            'extension' => $extension,
+            'allowed_extensions' => $allowedExtensions,
+            'message' => $errorMessage,
+        ]);
         return null;
     }
 
-    $tmpName = (string) ($file['tmp_name'] ?? '');
     if ($tmpName === '' || !is_uploaded_file($tmpName)) {
         $errorMessage = 'Upload failed. Please try again.';
+        lwLogUploadEvent('upload_failed', $uploadContext + [
+            'reason' => 'missing_or_invalid_uploaded_file',
+            'is_uploaded_file' => $tmpName !== '' ? is_uploaded_file($tmpName) : false,
+            'tmp_exists' => $tmpName !== '' ? file_exists($tmpName) : false,
+            'message' => $errorMessage,
+        ]);
         return null;
     }
 
     if (in_array($extension, ['jpg', 'jpeg', 'png', 'webp'], true) && @getimagesize($tmpName) === false) {
         $errorMessage = 'Upload failed. Please use a valid image file.';
+        lwLogUploadEvent('upload_failed', $uploadContext + [
+            'reason' => 'invalid_image_file',
+            'extension' => $extension,
+            'message' => $errorMessage,
+        ]);
         return null;
     }
 
@@ -438,28 +603,75 @@ function cmsUploadFile(
         $svgContents = @file_get_contents($tmpName) ?: '';
         if ($svgContents === '' || stripos($svgContents, '<svg') === false) {
             $errorMessage = 'Upload failed. Please use a valid SVG file.';
+            lwLogUploadEvent('upload_failed', $uploadContext + [
+                'reason' => 'invalid_svg_file',
+                'message' => $errorMessage,
+            ]);
             return null;
         }
     }
 
-    $baseFolder = dirname(__DIR__) . '/uploads/' . trim($targetFolder, '/');
+    if ($targetFolder === '' || str_contains($targetFolder, '..')) {
+        $errorMessage = 'Upload failed. Please try again.';
+        lwLogUploadEvent('upload_failed', $uploadContext + [
+            'reason' => 'invalid_target_folder',
+            'message' => $errorMessage,
+        ]);
+        return null;
+    }
+
+    $baseFolder = dirname(__DIR__) . '/uploads/' . $targetFolder;
     if (!is_dir($baseFolder)) {
         @mkdir($baseFolder, 0755, true);
     }
 
     if (!is_dir($baseFolder)) {
         $errorMessage = 'Upload failed. Please try again.';
+        lwLogUploadEvent('upload_failed', $uploadContext + [
+            'reason' => 'target_directory_missing',
+            'target_directory' => $baseFolder,
+            'message' => $errorMessage,
+        ]);
         return null;
     }
 
-    $filename = $prefix . '-' . time() . '-' . bin2hex(random_bytes(4)) . '.' . $extension;
+    if (!is_writable($baseFolder)) {
+        $errorMessage = 'Upload failed because the upload folder is not writable.';
+        lwLogUploadEvent('upload_failed', $uploadContext + [
+            'reason' => 'target_directory_not_writable',
+            'target_directory' => $baseFolder,
+            'message' => $errorMessage,
+        ]);
+        return null;
+    }
+
+    try {
+        $token = bin2hex(random_bytes(4));
+    } catch (Throwable $exception) {
+        lwReportException($exception, ['area' => 'cms_upload_token']);
+        $token = substr(str_replace('.', '', uniqid('', true)), -8);
+    }
+
+    $filename = $prefix . '-' . time() . '-' . $token . '.' . $extension;
     $absolutePath = $baseFolder . '/' . $filename;
-    if (!move_uploaded_file($tmpName, $absolutePath)) {
+    if (function_exists('error_clear_last')) {
+        error_clear_last();
+    }
+
+    if (!@move_uploaded_file($tmpName, $absolutePath)) {
         $errorMessage = 'Upload failed. Please try again.';
+        lwLogUploadEvent('upload_failed', $uploadContext + [
+            'reason' => 'move_uploaded_file_failed',
+            'target_path' => $absolutePath,
+            'target_directory' => $baseFolder,
+            'target_directory_writable' => is_writable($baseFolder),
+            'last_php_error' => error_get_last(),
+            'message' => $errorMessage,
+        ]);
         return null;
     }
 
-    return 'uploads/' . trim($targetFolder, '/') . '/' . $filename;
+    return 'uploads/' . $targetFolder . '/' . $filename;
 }
 
 function lwOptimizeUploadedImage(string $relativePath, int $maxWidth = 900, int $maxHeight = 900, int $quality = 82): void

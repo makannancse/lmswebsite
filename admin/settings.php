@@ -18,6 +18,15 @@ function lwLogSettingChange(string $key, string $oldValue, string $newValue, boo
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (($oversizedPostMessage = lwGetPostMaxSizeUploadError('admin_settings')) !== null) {
+        $_SESSION['admin_flash'] = [
+            'type' => 'danger',
+            'text' => $oversizedPostMessage,
+        ];
+        header('Location: settings.php');
+        exit;
+    }
+
     $settingsBefore = getSettings();
     $textSettings = [
         'site_phone' => trim($_POST['site_phone'] ?? ''),
@@ -73,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ];
 
     $logoError = null;
-    $logo = cmsUploadFile($_FILES['logo'] ?? [], 'logos', ['png', 'jpg', 'jpeg', 'svg'], 'logo', 2097152, $logoError);
+    $logo = cmsUploadFile($_FILES['logo'] ?? [], 'logos', ['png', 'jpg', 'jpeg', 'svg'], 'logo', 2097152, $logoError, 'logo');
     if ($logo !== null) {
         lwSaveSetting($pdo, 'site_logo', $logo, 'image');
         lwSaveSetting($pdo, 'logo', $logo, 'image');
@@ -85,7 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $faviconError = null;
-    $favicon = cmsUploadFile($_FILES['favicon'] ?? [], 'logos', ['png', 'jpg', 'jpeg', 'ico', 'svg'], 'favicon', 1048576, $faviconError);
+    $favicon = cmsUploadFile($_FILES['favicon'] ?? [], 'logos', ['png', 'jpg', 'jpeg', 'ico', 'svg'], 'favicon', 1048576, $faviconError, 'favicon');
     if ($favicon !== null) {
         lwSaveSetting($pdo, 'favicon', $favicon, 'image');
     } elseif (!empty($_FILES['favicon']['name']) && ($flash['type'] ?? '') !== 'danger') {

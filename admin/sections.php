@@ -6,6 +6,8 @@ requireAdminLogin();
 $pageTitle = 'Sections';
 $pageId = isset($_GET['page_id']) ? (int) $_GET['page_id'] : 0;
 $editId = isset($_GET['edit']) ? (int) $_GET['edit'] : 0;
+$message = '';
+$messageType = 'success';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'sort') {
     $order = $_POST['order'] ?? [];
@@ -29,45 +31,70 @@ if (isset($_GET['delete'])) {
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') !== 'sort') {
-    $payload = [
-        ':page_id' => (int) ($_POST['page_id'] ?? 0),
-        ':section_key' => trim($_POST['section_key'] ?? ''),
-        ':section_title' => trim($_POST['section_title'] ?? ''),
-        ':section_subtitle' => trim($_POST['section_subtitle'] ?? ''),
-        ':section_content' => trim($_POST['section_content'] ?? ''),
-        ':section_image' => trim($_POST['section_image'] ?? ''),
-        ':section_type' => trim($_POST['section_type'] ?? 'rich_text'),
-        ':section_settings' => trim($_POST['section_settings'] ?? ''),
-        ':sort_order' => (int) ($_POST['sort_order'] ?? 0),
-        ':status' => $_POST['status'] ?? 'inactive',
-    ];
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') !== 'sort' && ($oversizedPostMessage = lwGetPostMaxSizeUploadError('admin_sections')) !== null) {
+    $message = $oversizedPostMessage;
+    $messageType = 'danger';
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') !== 'sort') {
+    $sectionImage = trim($_POST['section_image'] ?? '');
+    $sectionImageError = null;
+    $uploadedSectionImage = cmsUploadFile(
+        $_FILES['section_image_file'] ?? [],
+        'banners',
+        ['jpg', 'jpeg', 'png', 'webp'],
+        'banner',
+        5 * 1024 * 1024,
+        $sectionImageError,
+        'section_image_file'
+    );
 
-    if (!empty($_POST['id'])) {
-        $payload[':id'] = (int) $_POST['id'];
-        $stmt = $pdo->prepare('
-            UPDATE page_sections
-            SET page_id = :page_id, section_key = :section_key, section_title = :section_title, section_subtitle = :section_subtitle,
-                section_content = :section_content, section_image = :section_image, section_type = :section_type,
-                section_settings = :section_settings, sort_order = :sort_order, status = :status
-            WHERE id = :id
-        ');
-        $stmt->execute($payload);
-    } else {
-        $stmt = $pdo->prepare('
-            INSERT INTO page_sections (
-                page_id, section_key, section_title, section_subtitle, section_content,
-                section_image, section_type, section_settings, sort_order, status
-            ) VALUES (
-                :page_id, :section_key, :section_title, :section_subtitle, :section_content,
-                :section_image, :section_type, :section_settings, :sort_order, :status
-            )
-        ');
-        $stmt->execute($payload);
+    if ($uploadedSectionImage !== null) {
+        lwOptimizeUploadedImage($uploadedSectionImage, 1600, 900, 84);
+        $sectionImage = $uploadedSectionImage;
     }
 
-    header('Location: sections.php?page_id=' . (int) $payload[':page_id'] . '&saved=1');
-    exit;
+    if ($sectionImageError !== null) {
+        $message = $sectionImageError;
+        $messageType = 'danger';
+    } else {
+        $payload = [
+            ':page_id' => (int) ($_POST['page_id'] ?? 0),
+            ':section_key' => trim($_POST['section_key'] ?? ''),
+            ':section_title' => trim($_POST['section_title'] ?? ''),
+            ':section_subtitle' => trim($_POST['section_subtitle'] ?? ''),
+            ':section_content' => trim($_POST['section_content'] ?? ''),
+            ':section_image' => $sectionImage,
+            ':section_type' => trim($_POST['section_type'] ?? 'rich_text'),
+            ':section_settings' => trim($_POST['section_settings'] ?? ''),
+            ':sort_order' => (int) ($_POST['sort_order'] ?? 0),
+            ':status' => $_POST['status'] ?? 'inactive',
+        ];
+
+        if (!empty($_POST['id'])) {
+            $payload[':id'] = (int) $_POST['id'];
+            $stmt = $pdo->prepare('
+                UPDATE page_sections
+                SET page_id = :page_id, section_key = :section_key, section_title = :section_title, section_subtitle = :section_subtitle,
+                    section_content = :section_content, section_image = :section_image, section_type = :section_type,
+                    section_settings = :section_settings, sort_order = :sort_order, status = :status
+                WHERE id = :id
+            ');
+            $stmt->execute($payload);
+        } else {
+            $stmt = $pdo->prepare('
+                INSERT INTO page_sections (
+                    page_id, section_key, section_title, section_subtitle, section_content,
+                    section_image, section_type, section_settings, sort_order, status
+                ) VALUES (
+                    :page_id, :section_key, :section_title, :section_subtitle, :section_content,
+                    :section_image, :section_type, :section_settings, :sort_order, :status
+                )
+            ');
+            $stmt->execute($payload);
+        }
+
+        header('Location: sections.php?page_id=' . (int) $payload[':page_id'] . '&saved=1');
+        exit;
+    }
 }
 
 $pages = $pdo->query('SELECT id, page_name, page_title FROM pages ORDER BY page_title ASC')->fetchAll(PDO::FETCH_ASSOC);
@@ -93,11 +120,12 @@ include __DIR__ . '/admin-header.php';
 ?>
 <?php if (!empty($_GET['saved'])): ?><div class="alert alert-success">Section saved successfully.</div><?php endif; ?>
 <?php if (!empty($_GET['deleted'])): ?><div class="alert alert-success">Section deleted successfully.</div><?php endif; ?>
+<?php if ($message !== ''): ?><div class="alert alert-<?= htmlspecialchars($messageType) ?>"><?= htmlspecialchars($message) ?></div><?php endif; ?>
 <div class="row g-4">
     <div class="col-xl-5">
         <div class="card admin-card p-4">
             <h5 class="mb-4"><?= $editSection ? 'Edit Section' : 'Add Section' ?></h5>
-            <form method="post">
+            <form method="post" enctype="multipart/form-data">
                 <input type="hidden" name="id" value="<?= htmlspecialchars((string) ($editSection['id'] ?? '')) ?>">
                 <div class="mb-3">
                     <label class="form-label">Page</label>
@@ -135,8 +163,17 @@ include __DIR__ . '/admin-header.php';
                     <div class="form-text">Use pipe-separated lines for structured content, for example `Title|Description|bi-icon`.</div>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Image URL</label>
+                    <label class="form-label">Image URL or Path</label>
                     <input type="text" name="section_image" class="form-control" value="<?= htmlspecialchars($editSection['section_image'] ?? '') ?>">
+                    <?php if (!empty($editSection['section_image'])): ?>
+                        <?php $sectionImagePreview = preg_match('/^https?:\/\//i', $editSection['section_image']) ? $editSection['section_image'] : '../' . $editSection['section_image']; ?>
+                        <img src="<?= htmlspecialchars($sectionImagePreview) ?>" alt="Section image preview" class="img-fluid rounded-3 border mt-3" style="max-height: 160px;">
+                    <?php endif; ?>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Upload Image</label>
+                    <input type="file" name="section_image_file" class="form-control" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+                    <div class="form-text">Uploading a JPG, PNG, or WEBP replaces the image URL/path above when you save.</div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Section Settings JSON</label>

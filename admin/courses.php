@@ -1,61 +1,83 @@
 <?php
 require_once __DIR__ . '/auth.php';
+require_once __DIR__ . '/../includes/site.php';
 requireAdminLogin();
 
 $pageTitle = 'Courses';
 $message = '';
+$messageType = 'success';
 $courseId = null;
+$course = null;
 $categories = ['Mathematics', 'Science', 'Coding', 'Languages', 'Arts & Creativity', 'Test Preparation'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $courseId = isset($_POST['course_id']) ? (int) $_POST['course_id'] : null;
-    $title = trim($_POST['title'] ?? '');
-    $category = trim($_POST['category'] ?? '');
-    $description = trim($_POST['description'] ?? '');
-    $status = in_array($_POST['status'] ?? 'active', ['active', 'inactive'], true) ? $_POST['status'] : 'active';
-    $imagePath = trim($_POST['current_image'] ?? '');
-
-    if (!empty($_FILES['course_image']['name'])) {
-        $uploadDir = __DIR__ . '/../uploads/images/';
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0755, true);
-        }
-        $fileName = basename($_FILES['course_image']['name']);
-        $extension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
-        $allowed = ['jpg', 'jpeg', 'png', 'webp'];
-        if (in_array($extension, $allowed, true) && $_FILES['course_image']['error'] === UPLOAD_ERR_OK) {
-            $safeName = 'course-' . time() . '.' . $extension;
-            $targetPath = $uploadDir . $safeName;
-            if (move_uploaded_file($_FILES['course_image']['tmp_name'], $targetPath)) {
-                $imagePath = 'uploads/images/' . $safeName;
-            }
-        }
-    }
-
-    if ($courseId) {
-        $stmt = $pdo->prepare('UPDATE courses SET title = :title, description = :description, category = :category, image = :image, status = :status WHERE id = :id');
-        $stmt->execute([
-            ':title' => $title,
-            ':description' => $description,
-            ':category' => $category,
-            ':image' => $imagePath,
-            ':status' => $status,
-            ':id' => $courseId,
-        ]);
-        $message = 'Course updated successfully.';
+    if (($oversizedPostMessage = lwGetPostMaxSizeUploadError('admin_courses')) !== null) {
+        $message = $oversizedPostMessage;
+        $messageType = 'danger';
     } else {
-        $stmt = $pdo->prepare('INSERT INTO courses (title, description, category, image, status) VALUES (:title, :description, :category, :image, :status)');
-        $stmt->execute([
-            ':title' => $title,
-            ':description' => $description,
-            ':category' => $category,
-            ':image' => $imagePath,
-            ':status' => $status,
-        ]);
-        $message = 'Course added successfully.';
+        $courseId = isset($_POST['course_id']) && $_POST['course_id'] !== '' ? (int) $_POST['course_id'] : null;
+        $title = trim($_POST['title'] ?? '');
+        $category = trim($_POST['category'] ?? '');
+        $description = trim($_POST['description'] ?? '');
+        $status = in_array($_POST['status'] ?? 'active', ['active', 'inactive'], true) ? $_POST['status'] : 'active';
+        $imagePath = trim($_POST['current_image'] ?? '');
+
+        $uploadError = null;
+        $uploadedImage = cmsUploadFile(
+            $_FILES['course_image'] ?? [],
+            'images',
+            ['jpg', 'jpeg', 'png', 'webp'],
+            'course',
+            5 * 1024 * 1024,
+            $uploadError,
+            'course_image'
+        );
+
+        if ($uploadedImage !== null) {
+            lwOptimizeUploadedImage($uploadedImage, 1200, 900, 82);
+            $imagePath = $uploadedImage;
+        }
+
+        $course = [
+            'id' => $courseId,
+            'title' => $title,
+            'category' => $category,
+            'description' => $description,
+            'image' => $imagePath,
+            'status' => $status,
+        ];
+
+        if ($title === '' || $category === '' || $description === '') {
+            $message = 'Please enter the course title, category, and description.';
+            $messageType = 'danger';
+        } elseif ($uploadError !== null) {
+            $message = $uploadError;
+            $messageType = 'danger';
+        } elseif ($courseId) {
+            $stmt = $pdo->prepare('UPDATE courses SET title = :title, description = :description, category = :category, image = :image, status = :status WHERE id = :id');
+            $stmt->execute([
+                ':title' => $title,
+                ':description' => $description,
+                ':category' => $category,
+                ':image' => $imagePath,
+                ':status' => $status,
+                ':id' => $courseId,
+            ]);
+            header('Location: courses.php?success=1');
+            exit;
+        } else {
+            $stmt = $pdo->prepare('INSERT INTO courses (title, description, category, image, status) VALUES (:title, :description, :category, :image, :status)');
+            $stmt->execute([
+                ':title' => $title,
+                ':description' => $description,
+                ':category' => $category,
+                ':image' => $imagePath,
+                ':status' => $status,
+            ]);
+            header('Location: courses.php?success=1');
+            exit;
+        }
     }
-    header('Location: courses.php?success=1');
-    exit;
 }
 
 if (!empty($_GET['delete'])) {
@@ -65,13 +87,11 @@ if (!empty($_GET['delete'])) {
     exit;
 }
 
-if (!empty($_GET['edit'])) {
+if ($course === null && !empty($_GET['edit'])) {
     $courseId = (int) $_GET['edit'];
     $course = $pdo->prepare('SELECT * FROM courses WHERE id = :id LIMIT 1');
     $course->execute([':id' => $courseId]);
     $course = $course->fetch(PDO::FETCH_ASSOC);
-} else {
-    $course = null;
 }
 
 $courses = $pdo->query('SELECT * FROM courses ORDER BY created_at DESC')->fetchAll(PDO::FETCH_ASSOC);
@@ -82,6 +102,9 @@ include __DIR__ . '/admin-header.php';
 <?php endif; ?>
 <?php if (!empty($_GET['deleted'])): ?>
     <div class="alert alert-success">Course deleted successfully.</div>
+<?php endif; ?>
+<?php if ($message !== ''): ?>
+    <div class="alert alert-<?= htmlspecialchars($messageType) ?>"><?= htmlspecialchars($message) ?></div>
 <?php endif; ?>
 <div class="row g-4">
     <div class="col-lg-5">
@@ -108,7 +131,7 @@ include __DIR__ . '/admin-header.php';
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Image</label>
-                    <input type="file" name="course_image" class="form-control">
+                    <input type="file" name="course_image" class="form-control" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
                     <?php if (!empty($course['image'])): ?>
                         <img src="../<?= htmlspecialchars($course['image']) ?>" alt="Course image" class="img-fluid rounded-3 mt-3" style="max-height: 160px;">
                     <?php endif; ?>

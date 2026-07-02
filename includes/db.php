@@ -1099,8 +1099,15 @@ function lwInitializeDatabase(PDO $pdo): void
             'status' => 'active',
         ],
     ];
-    foreach ($defaultVideos as $video) {
-        lwEnsureSampleVideo($pdo, $video);
+    $sampleVideosSeeded = $pdo->query("SELECT setting_value FROM website_settings WHERE setting_key = 'default_sample_videos_seeded' LIMIT 1")->fetchColumn();
+    if ($sampleVideosSeeded !== '1') {
+        if ((int) $pdo->query('SELECT COUNT(*) FROM sample_videos')->fetchColumn() === 0) {
+            foreach ($defaultVideos as $video) {
+                lwEnsureSampleVideo($pdo, $video);
+            }
+        }
+
+        lwSaveSetting($pdo, 'default_sample_videos_seeded', '1', 'text');
     }
 
     $defaultStandards = [

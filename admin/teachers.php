@@ -42,111 +42,117 @@ function lwDeleteTeacherPhotoFile(?string $path): void
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     $action = (string) ($_POST['action'] ?? '');
 
-    try {
-        if ($action === 'add' || $action === 'edit') {
-            $id = (int) ($_POST['id'] ?? 0);
-            $name = trim((string) ($_POST['name'] ?? ''));
-            $subject = trim((string) ($_POST['subject'] ?? ''));
-            $qualifications = trim((string) ($_POST['qualifications'] ?? ''));
-            $bio = trim((string) ($_POST['bio'] ?? ''));
-            $experienceYears = max(0, (int) ($_POST['experience_years'] ?? 0));
-            $studentsCount = max(0, (int) ($_POST['students_count'] ?? 0));
-            $experience = $experienceYears > 0 ? $experienceYears . ' years' : '';
-            $status = isset($_POST['status']) ? 'active' : 'inactive';
-            $currentTeacher = $action === 'edit' ? lwFetchTeacher($pdo, $id) : null;
+    if (($oversizedPostMessage = lwGetPostMaxSizeUploadError('admin_teachers')) !== null) {
+        $message = $oversizedPostMessage;
+        $messageType = 'danger';
+    } else {
+        try {
+            if ($action === 'add' || $action === 'edit') {
+                $id = (int) ($_POST['id'] ?? 0);
+                $name = trim((string) ($_POST['name'] ?? ''));
+                $subject = trim((string) ($_POST['subject'] ?? ''));
+                $qualifications = trim((string) ($_POST['qualifications'] ?? ''));
+                $bio = trim((string) ($_POST['bio'] ?? ''));
+                $experienceYears = max(0, (int) ($_POST['experience_years'] ?? 0));
+                $studentsCount = max(0, (int) ($_POST['students_count'] ?? 0));
+                $experience = $experienceYears > 0 ? $experienceYears . ' years' : '';
+                $status = isset($_POST['status']) ? 'active' : 'inactive';
+                $currentTeacher = $action === 'edit' ? lwFetchTeacher($pdo, $id) : null;
 
-            if ($name === '' || $subject === '') {
-                $message = 'Please enter the teacher name and subject.';
-                $messageType = 'danger';
-            } elseif ($action === 'edit' && !$currentTeacher) {
-                $message = 'Teacher profile not found.';
-                $messageType = 'danger';
-            } else {
-                $imagePath = (string) ($currentTeacher['image'] ?? '');
-                $uploadError = null;
-                $uploadedImage = cmsUploadFile(
-                    $_FILES['image'] ?? [],
-                    'teachers',
-                    ['jpg', 'jpeg', 'png', 'webp'],
-                    'teacher',
-                    5 * 1024 * 1024,
-                    $uploadError
-                );
-
-                if ($uploadError !== null) {
-                    $message = $uploadError;
+                if ($name === '' || $subject === '') {
+                    $message = 'Please enter the teacher name and subject.';
+                    $messageType = 'danger';
+                } elseif ($action === 'edit' && !$currentTeacher) {
+                    $message = 'Teacher profile not found.';
                     $messageType = 'danger';
                 } else {
-                    if ($uploadedImage !== null) {
-                        lwOptimizeUploadedImage($uploadedImage, 900, 900, 82);
-                        if ($imagePath !== '' && $imagePath !== $uploadedImage) {
-                            lwDeleteTeacherPhotoFile($imagePath);
-                        }
-                        $imagePath = $uploadedImage;
-                    } elseif ($action === 'edit' && !empty($_POST['remove_image']) && $imagePath !== '') {
-                        lwDeleteTeacherPhotoFile($imagePath);
-                        $imagePath = '';
-                    }
+                    $imagePath = (string) ($currentTeacher['image'] ?? '');
+                    $uploadError = null;
+                    $uploadedImage = cmsUploadFile(
+                        $_FILES['image'] ?? [],
+                        'teachers',
+                        ['jpg', 'jpeg', 'png', 'webp'],
+                        'teacher',
+                        5 * 1024 * 1024,
+                        $uploadError,
+                        'image'
+                    );
 
-                    if ($action === 'add') {
-                        $stmt = $pdo->prepare('
-                            INSERT INTO teachers (name, subject, experience, qualifications, bio, experience_years, students_count, image, status)
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                        ');
-                        $stmt->execute([
-                            $name,
-                            $subject,
-                            $experience,
-                            $qualifications,
-                            $bio,
-                            $experienceYears,
-                            $studentsCount,
-                            $imagePath,
-                            $status,
-                        ]);
-                        $message = 'Teacher added successfully.';
+                    if ($uploadError !== null) {
+                        $message = $uploadError;
+                        $messageType = 'danger';
                     } else {
-                        $stmt = $pdo->prepare('
-                            UPDATE teachers
-                            SET name = ?, subject = ?, experience = ?, qualifications = ?, bio = ?, experience_years = ?, students_count = ?, image = ?, status = ?
-                            WHERE id = ?
-                        ');
-                        $stmt->execute([
-                            $name,
-                            $subject,
-                            $experience,
-                            $qualifications,
-                            $bio,
-                            $experienceYears,
-                            $studentsCount,
-                            $imagePath,
-                            $status,
-                            $id,
-                        ]);
-                        $message = 'Teacher updated successfully.';
-                    }
+                        if ($uploadedImage !== null) {
+                            lwOptimizeUploadedImage($uploadedImage, 900, 900, 82);
+                            if ($imagePath !== '' && $imagePath !== $uploadedImage) {
+                                lwDeleteTeacherPhotoFile($imagePath);
+                            }
+                            $imagePath = $uploadedImage;
+                        } elseif ($action === 'edit' && !empty($_POST['remove_image']) && $imagePath !== '') {
+                            lwDeleteTeacherPhotoFile($imagePath);
+                            $imagePath = '';
+                        }
 
+                        if ($action === 'add') {
+                            $stmt = $pdo->prepare('
+                                INSERT INTO teachers (name, subject, experience, qualifications, bio, experience_years, students_count, image, status)
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            ');
+                            $stmt->execute([
+                                $name,
+                                $subject,
+                                $experience,
+                                $qualifications,
+                                $bio,
+                                $experienceYears,
+                                $studentsCount,
+                                $imagePath,
+                                $status,
+                            ]);
+                            $message = 'Teacher added successfully.';
+                        } else {
+                            $stmt = $pdo->prepare('
+                                UPDATE teachers
+                                SET name = ?, subject = ?, experience = ?, qualifications = ?, bio = ?, experience_years = ?, students_count = ?, image = ?, status = ?
+                                WHERE id = ?
+                            ');
+                            $stmt->execute([
+                                $name,
+                                $subject,
+                                $experience,
+                                $qualifications,
+                                $bio,
+                                $experienceYears,
+                                $studentsCount,
+                                $imagePath,
+                                $status,
+                                $id,
+                            ]);
+                            $message = 'Teacher updated successfully.';
+                        }
+
+                        $messageType = 'success';
+                    }
+                }
+            } elseif ($action === 'delete') {
+                $id = (int) ($_POST['id'] ?? 0);
+                $teacher = lwFetchTeacher($pdo, $id);
+                if ($teacher) {
+                    lwDeleteTeacherPhotoFile($teacher['image'] ?? '');
+                    $stmt = $pdo->prepare('DELETE FROM teachers WHERE id = ?');
+                    $stmt->execute([$id]);
+                    $message = 'Teacher deleted successfully.';
                     $messageType = 'success';
+                } else {
+                    $message = 'Teacher profile not found.';
+                    $messageType = 'danger';
                 }
             }
-        } elseif ($action === 'delete') {
-            $id = (int) ($_POST['id'] ?? 0);
-            $teacher = lwFetchTeacher($pdo, $id);
-            if ($teacher) {
-                lwDeleteTeacherPhotoFile($teacher['image'] ?? '');
-                $stmt = $pdo->prepare('DELETE FROM teachers WHERE id = ?');
-                $stmt->execute([$id]);
-                $message = 'Teacher deleted successfully.';
-                $messageType = 'success';
-            } else {
-                $message = 'Teacher profile not found.';
-                $messageType = 'danger';
-            }
+        } catch (Throwable $exception) {
+            lwReportException($exception, ['area' => 'admin_teachers']);
+            $message = 'Something went wrong while saving the teacher profile.';
+            $messageType = 'danger';
         }
-    } catch (Throwable $exception) {
-        lwReportException($exception, ['area' => 'admin_teachers']);
-        $message = 'Something went wrong while saving the teacher profile.';
-        $messageType = 'danger';
     }
 }
 
