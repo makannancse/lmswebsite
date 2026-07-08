@@ -319,9 +319,7 @@ include __DIR__ . '/admin-header.php';
             <ul class="list-group list-group-flush video-sortable">
                 <?php foreach ($videos as $video): ?>
                     <?php
-                    $thumbnailSrc = $video['thumbnail']
-                        ? (preg_match('/^https?:\/\//i', $video['thumbnail']) ? $video['thumbnail'] : '../' . $video['thumbnail'])
-                        : 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=200&q=80';
+			$thumbnailSrc = $video['thumbnail'];
                     ?>
                     <li class="list-group-item d-flex align-items-center justify-content-between gap-3" data-id="<?= (int) $video['id'] ?>">
                         <div class="d-flex align-items-center gap-3">

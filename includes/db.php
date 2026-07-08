@@ -19,10 +19,10 @@ if (!empty($localConfig['app_base_path'])) {
     define('LW_APP_BASE_PATH', (string) $localConfig['app_base_path']);
 }
 
-$dbHost = (string) ($localConfig['db_host'] ?? '127.0.0.1');
+$dbHost = (string) ($localConfig['db_host'] ?? 'localhost');
 $dbName = (string) ($localConfig['db_name'] ?? 'learnwise');
-$dbUser = (string) ($localConfig['db_user'] ?? 'root');
-$dbPass = (string) ($localConfig['db_pass'] ?? '');
+$dbUser = (string) ($localConfig['db_user'] ?? 'admin');
+$dbPass = (string) ($localConfig['db_pass'] ?? 'StrongPassword123!');
 
 function lwTableExists(PDO $pdo, string $table): bool
 {
