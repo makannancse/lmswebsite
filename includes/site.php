@@ -783,6 +783,7 @@ function getSectionTypes(): array
         'contact_form' => 'Contact Form',
         'rich_text' => 'Rich Text Block',
         'trust' => 'Trust Indicators',
+        'founder' => 'Founder Note',
     ];
 }
 
@@ -855,4 +856,77 @@ function getCourseImageUrl(array $course): string
 
     $meta = getCourseCategoryMeta($category);
     return $meta['image'];
+}
+
+function getTestimonials($status = 'active'): array
+{
+    $pdo = lwGetPdo();
+    $status = lwNormalizeStatusFilter($status);
+    $query = 'SELECT * FROM testimonials';
+    $params = [];
+    if ($status !== 'all') {
+        $query .= ' WHERE status = :status';
+        $params[':status'] = $status;
+    }
+    $query .= ' ORDER BY sort_order ASC, id DESC';
+    $stmt = $pdo->prepare($query);
+    $stmt->execute($params);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function getTestimonialImageUrl(?array $testimonial): string
+{
+    if ($testimonial !== null && !empty($testimonial['image'])) {
+        $cleanPath = ltrim(str_replace('\\', '/', $testimonial['image']), '/');
+        if (str_starts_with($cleanPath, 'http://') || str_starts_with($cleanPath, 'https://')) {
+            return $cleanPath;
+        }
+        return $cleanPath;
+    }
+    return 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80';
+}
+
+function getVideoThumbnail(array $video): string
+{
+    $thumbnail = trim((string) ($video['thumbnail'] ?? ''));
+    if ($thumbnail === '' || str_contains($thumbnail, 'unsplash.com')) {
+        $videoUrl = trim((string) ($video['video_url'] ?? ''));
+        $videoFile = trim((string) ($video['video_file'] ?? ''));
+        
+        if ($videoUrl !== '') {
+            if (preg_match('%(?:youtube(?:-nocookie)?\.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu\.be/)([^"&?/\s]{11})%i', $videoUrl, $match)) {
+                return "https://img.youtube.com/vi/{$match[1]}/hqdefault.jpg";
+            }
+            
+            if (preg_match('%vimeo\.com/(?:channels/(?:\w+/)?|groups/([^/]*)/videos/|album/(\d+)/video/|video/|)(\d+)(?:$|[?])%i', $videoUrl, $match)) {
+                return getVimeoThumbnailUrl($match[3]);
+            }
+        }
+        
+        if ($videoFile !== '') {
+            return 'video-preview';
+        }
+        
+        return 'assets/images/video-placeholder.svg';
+    }
+    return $thumbnail;
+}
+
+function getVimeoThumbnailUrl(string $vimeoId): string
+{
+    $ctx = stream_context_create([
+        'http' => [
+            'timeout' => 1.5,
+        ]
+    ]);
+    
+    $response = @file_get_contents("https://vimeo.com/api/v2/video/{$vimeoId}.json", false, $ctx);
+    if ($response !== false) {
+        $data = json_decode($response, true);
+        if (!empty($data[0]['thumbnail_large'])) {
+            return $data[0]['thumbnail_large'];
+        }
+    }
+    
+    return 'assets/images/video-placeholder.svg';
 }

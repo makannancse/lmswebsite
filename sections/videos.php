@@ -43,7 +43,12 @@ if (!$useVideoLibrary && $contentItems !== []) {
                             data-video-type="<?= !empty($video['video_file']) ? 'file' : 'url' ?>"
                         >
                             <div class="video-thumbnail">
-                                <img src="<?= htmlspecialchars($video['thumbnail'] ? htmlspecialchars($video['thumbnail']) : 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=800&q=80') ?>" alt="<?= htmlspecialchars($video['title']) ?>" class="card-img-top" loading="lazy" decoding="async">
+                                <?php $thumbSrc = getVideoThumbnail($video); ?>
+                                <?php if ($thumbSrc === 'video-preview' && !empty($video['video_file'])): ?>
+                                    <video class="card-img-top video-preview-el" muted preload="metadata" src="<?= htmlspecialchars($video['video_file']) ?>#t=1" onmouseenter="this.play()" onmouseleave="this.pause();this.currentTime=1;"></video>
+                                <?php else: ?>
+                                    <img src="<?= htmlspecialchars($thumbSrc) ?>" alt="<?= htmlspecialchars($video['title']) ?>" class="card-img-top" loading="lazy" decoding="async">
+                                <?php endif; ?>
                                 <div class="video-play-overlay">
                                     <span class="video-play-button">
                                         <i class="bi bi-play-fill"></i>

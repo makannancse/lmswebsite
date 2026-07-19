@@ -51,6 +51,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                 $id = (int) ($_POST['id'] ?? 0);
                 $name = trim((string) ($_POST['name'] ?? ''));
                 $subject = trim((string) ($_POST['subject'] ?? ''));
+                $designation = trim((string) ($_POST['designation'] ?? ''));
                 $qualifications = trim((string) ($_POST['qualifications'] ?? ''));
                 $bio = trim((string) ($_POST['bio'] ?? ''));
                 $experienceYears = max(0, (int) ($_POST['experience_years'] ?? 0));
@@ -95,12 +96,13 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 
                         if ($action === 'add') {
                             $stmt = $pdo->prepare('
-                                INSERT INTO teachers (name, subject, experience, qualifications, bio, experience_years, students_count, image, status)
-                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                INSERT INTO teachers (name, subject, designation, experience, qualifications, bio, experience_years, students_count, image, status)
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                             ');
                             $stmt->execute([
                                 $name,
                                 $subject,
+                                $designation,
                                 $experience,
                                 $qualifications,
                                 $bio,
@@ -113,12 +115,13 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                         } else {
                             $stmt = $pdo->prepare('
                                 UPDATE teachers
-                                SET name = ?, subject = ?, experience = ?, qualifications = ?, bio = ?, experience_years = ?, students_count = ?, image = ?, status = ?
+                                SET name = ?, subject = ?, designation = ?, experience = ?, qualifications = ?, bio = ?, experience_years = ?, students_count = ?, image = ?, status = ?
                                 WHERE id = ?
                             ');
                             $stmt->execute([
                                 $name,
                                 $subject,
+                                $designation,
                                 $experience,
                                 $qualifications,
                                 $bio,
@@ -334,6 +337,13 @@ include __DIR__ . '/admin-header.php';
                                 </div>
                             </div>
 
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <label for="designation" class="form-label">Designation</label>
+                                    <input type="text" class="form-control" id="designation" name="designation" placeholder="e.g. Senior Mathematics Instructor">
+                                </div>
+                            </div>
+
                             <div class="mb-3">
                                 <label for="qualifications" class="form-label">Qualifications</label>
                                 <input type="text" class="form-control" id="qualifications" name="qualifications" placeholder="e.g. M.Sc. Mathematics, B.Ed.">
@@ -428,6 +438,7 @@ function resetForm() {
     document.getElementById('teacherSubmitButton').textContent = 'Save Teacher';
     document.getElementById('experience_years').value = '0';
     document.getElementById('students_count').value = '0';
+    document.getElementById('designation').value = '';
     document.getElementById('status').checked = true;
     document.getElementById('remove_image').checked = false;
     document.getElementById('removeImageWrap').classList.add('d-none');
@@ -447,6 +458,7 @@ function editTeacher(id) {
     document.getElementById('teacherSubmitButton').textContent = 'Save Changes';
     document.getElementById('name').value = teacher.name || '';
     document.getElementById('subject').value = teacher.subject || '';
+    document.getElementById('designation').value = teacher.designation || '';
     document.getElementById('qualifications').value = teacher.qualifications || '';
     document.getElementById('bio').value = teacher.bio || '';
     document.getElementById('experience_years').value = teacher.experience_years || '0';

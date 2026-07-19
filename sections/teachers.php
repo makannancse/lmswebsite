@@ -1,48 +1,41 @@
-<section id="section-<?= htmlspecialchars($section['id']) ?>" class="teachers py-5">
+<?php
+$teachers = getTeachers();
+?>
+<section id="section-<?= htmlspecialchars($section['id']) ?>" class="section-surface">
     <div class="container">
-        <div class="text-center mb-5">
-            <small class="text-primary fw-semibold">Our Expert Faculty</small>
-            <h2 class="section-title mt-3 display-5 fw-bold text-primary"><?= htmlspecialchars($section['title']) ?></h2>
+        <div class="section-heading text-center mx-auto">
+            <span class="section-kicker">Our Expert Faculty</span>
+            <h2 class="section-title mt-3"><?= htmlspecialchars($section['title']) ?></h2>
             <?php if (!empty($section['subtitle'])): ?>
-                <p class="section-caption mt-3 lead text-muted"><?= htmlspecialchars($section['subtitle']) ?></p>
+                <p class="section-subtitle mx-auto mt-3"><?= htmlspecialchars($section['subtitle']) ?></p>
             <?php endif; ?>
         </div>
 
         <div class="row g-4">
-            <?php
-            $teachers = getTeachers();
-            foreach ($teachers as $teacher):
-                $teacherPhoto = getTeacherPhotoUrl($teacher);
-            ?>
-                <div class="col-lg-3 col-md-6">
-                    <div class="teacher-card card border-0 shadow-sm h-100">
-                        <div class="card-body text-center p-4">
-                            <div class="teacher-avatar mb-3">
-                                <img src="<?= htmlspecialchars($teacherPhoto) ?>" alt="<?= htmlspecialchars($teacher['name']) ?>" class="teacher-photo rounded-circle" width="104" height="104" loading="lazy" decoding="async">
-                            </div>
-                            <h5 class="card-title fw-bold text-primary mb-1"><?= htmlspecialchars($teacher['name']) ?></h5>
-                            <p class="text-muted small mb-2"><?= htmlspecialchars($teacher['subject']) ?></p>
-                            <?php if (!empty($teacher['bio'])): ?>
-                                <p class="card-text small text-muted mb-3"><?= htmlspecialchars($teacher['bio']) ?></p>
-                            <?php endif; ?>
-                            <div class="teacher-stats">
-                                <div class="row g-2">
-                                    <div class="col-6">
-                                        <div class="stat">
-                                            <small class="text-muted d-block">Experience</small>
-                                            <span class="fw-semibold text-primary"><?= htmlspecialchars($teacher['experience_years']) ?> yrs</span>
-                                        </div>
-                                    </div>
-                                    <div class="col-6">
-                                        <div class="stat">
-                                            <small class="text-muted d-block">Students</small>
-                                            <span class="fw-semibold text-primary"><?= htmlspecialchars($teacher['students_count']) ?>+</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+            <?php foreach ($teachers as $teacher): ?>
+                <?php $teacherPhoto = getTeacherPhotoUrl($teacher); ?>
+                <div class="col-xl-3 col-lg-4 col-md-6">
+                    <article class="expert-card h-100">
+                        <div class="expert-card-avatar-wrap">
+                            <img src="<?= htmlspecialchars($teacherPhoto) ?>"
+                                 alt="<?= htmlspecialchars($teacher['name']) ?>"
+                                 class="expert-card-avatar"
+                                 width="80" height="80"
+                                 loading="lazy" decoding="async">
                         </div>
-                    </div>
+                        <div class="expert-card-body">
+                            <h4 class="expert-card-name"><?= htmlspecialchars($teacher['name']) ?></h4>
+                            <p class="expert-card-role">
+                                <?= htmlspecialchars(!empty($teacher['designation']) ? $teacher['designation'] : $teacher['subject']) ?>
+                            </p>
+                            <?php if (!empty($teacher['subject'])): ?>
+                            <span class="expert-card-subject">
+                                <i class="bi bi-book-half"></i>
+                                <?= htmlspecialchars($teacher['subject']) ?>
+                            </span>
+                            <?php endif; ?>
+                        </div>
+                    </article>
                 </div>
             <?php endforeach; ?>
         </div>

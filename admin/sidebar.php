@@ -8,6 +8,7 @@ $menuItems = [
     ['label' => 'Teachers', 'page' => 'teachers.php', 'icon' => 'bi-person-badge'],
     ['label' => 'Videos', 'page' => 'sample_videos.php', 'icon' => 'bi-camera-video'],
     ['label' => 'Standards', 'page' => 'standards.php', 'icon' => 'bi-shield-check'],
+    ['label' => 'Testimonials', 'page' => 'testimonials.php', 'icon' => 'bi-chat-quote'],
     ['label' => 'Settings', 'page' => 'settings.php', 'icon' => 'bi-gear'],
     ['label' => 'Website Leads', 'page' => 'leads.php', 'icon' => 'bi-people'],
 ];

@@ -1189,6 +1189,80 @@ function lwInitializeDatabase(PDO $pdo): void
             $insertCourse->execute($course);
         }
     }
+
+    // LearnWise website enhancements database updates
+    lwEnsureColumn($pdo, 'teachers', 'designation', 'VARCHAR(150) DEFAULT NULL');
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS testimonials (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        parent_name VARCHAR(150) NOT NULL,
+        student_name VARCHAR(150) DEFAULT NULL,
+        review_text TEXT NOT NULL,
+        rating INT NOT NULL DEFAULT 5,
+        image VARCHAR(255) DEFAULT NULL,
+        sort_order INT NOT NULL DEFAULT 0,
+        status ENUM('active','inactive') DEFAULT 'active',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+    if ((int) $pdo->query('SELECT COUNT(*) FROM testimonials')->fetchColumn() === 0) {
+        $defaultTestimonials = [
+            [
+                'parent_name' => 'Mrs. Sharma',
+                'student_name' => 'Aditi',
+                'review_text' => 'Our daughter\'s confidence in math improved within weeks. The teachers are patient, prepared, and genuinely invested.',
+                'rating' => 5,
+                'image' => 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=300&q=80',
+                'sort_order' => 1,
+                'status' => 'active'
+            ],
+            [
+                'parent_name' => 'Arjun\'s Father',
+                'student_name' => 'Arjun, Grade 9',
+                'review_text' => 'Classes feel interactive and easy to follow. I can revisit recordings and stay on top of homework without stress.',
+                'rating' => 5,
+                'image' => 'https://images.unsplash.com/photo-1544717297-fa95b6ee9643?auto=format&fit=crop&w=300&q=80',
+                'sort_order' => 2,
+                'status' => 'active'
+            ],
+            [
+                'parent_name' => 'The Mehta Family',
+                'student_name' => 'Rohan',
+                'review_text' => 'Progress updates are clear, communication is fast, and scheduling works around our routine. Highly recommended.',
+                'rating' => 5,
+                'image' => 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80',
+                'sort_order' => 3,
+                'status' => 'active'
+            ]
+        ];
+        $insertTestimonial = $pdo->prepare('
+            INSERT INTO testimonials (parent_name, student_name, review_text, rating, image, sort_order, status)
+            VALUES (:parent_name, :student_name, :review_text, :rating, :image, :sort_order, :status)
+        ');
+        foreach ($defaultTestimonials as $t) {
+            $insertTestimonial->execute($t);
+        }
+    }
+
+    $checkFounder = $pdo->prepare('SELECT COUNT(*) FROM page_sections WHERE page_id = :page_id AND section_type = "founder"');
+    $checkFounder->execute([':page_id' => 1]);
+    if ((int) $checkFounder->fetchColumn() === 0) {
+        $insertFounder = $pdo->prepare('
+            INSERT INTO page_sections (page_id, section_key, section_title, section_subtitle, section_content, section_image, section_type, sort_order, status)
+            VALUES (1, "founder_note", "A Personal Vision", "Hear from the force behind LearnWise about our commitment to your child\'s future.", :content, "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80", "founder", 8, "active")
+        ');
+        $insertFounder->execute([
+            ':content' => "\"I started LearnWise with one clear belief—students deserve more value than what most education offers today. We deeply respect the time you invest and every single penny you spend. And we carry a strong promise—to deliver 10x value in return through everything we do. This is not about promises alone. It\'s about consistently delivering real quality, with honesty and global standards at the core\"\n\nLearnWise\nNarmadha Suresh\nFounder & CEO"
+        ]);
+    } else {
+        $pdo->exec('UPDATE page_sections SET sort_order = 8, status = "active" WHERE page_id = 1 AND section_type = "founder"');
+    }
+
+    // Ensure Founder+Teachers appear before Testimonials, which appears before Lead Form (sort=17)
+    $pdo->exec('UPDATE page_sections SET sort_order = 14 WHERE page_id = 1 AND section_type = "founder"');
+    $pdo->exec('UPDATE page_sections SET sort_order = 15 WHERE page_id = 1 AND section_key = "teachers_showcase"');
+    $pdo->exec('UPDATE page_sections SET sort_order = 16 WHERE page_id = 1 AND section_key = "testimonials"');
 }
 
 try {
