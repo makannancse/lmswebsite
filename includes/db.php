@@ -396,6 +396,11 @@ function lwInitializeDatabase(PDO $pdo): void
         lwSaveSetting($pdo, 'site_logo', (string) $legacyLogo, 'image');
     }
 
+    $dbSeedDone = $pdo->query("SELECT setting_value FROM website_settings WHERE setting_key = 'db_initial_seed_completed' LIMIT 1")->fetchColumn();
+    if ($dbSeedDone === '1') {
+        return;
+    }
+
     $pages = [
         [
             'page_name' => 'home',
@@ -1125,11 +1130,15 @@ function lwInitializeDatabase(PDO $pdo): void
     ];
     $upsertStandard = $pdo->prepare('SELECT id FROM standards_sections WHERE title = :title LIMIT 1');
     $insertStandard = $pdo->prepare('INSERT INTO standards_sections (title, content, icon, sort_order, status) VALUES (:title, :content, :icon, :sort_order, :status)');
-    $updateStandard = $pdo->prepare('UPDATE standards_sections SET content = :content, icon = :icon, sort_order = :sort_order, status = :status WHERE title = :title');
+    $updateStandard = $pdo->prepare('UPDATE standards_sections SET content = :content, icon = :icon WHERE title = :title');
     foreach ($defaultStandards as $standard) {
         $upsertStandard->execute([':title' => $standard['title']]);
         if ($upsertStandard->fetchColumn()) {
-            $updateStandard->execute($standard);
+            $updateStandard->execute([
+                ':title' => $standard['title'],
+                ':content' => $standard['content'],
+                ':icon' => $standard['icon'],
+            ]);
         } else {
             $insertStandard->execute($standard);
         }
@@ -1145,11 +1154,16 @@ function lwInitializeDatabase(PDO $pdo): void
     ];
     $upsertRule = $pdo->prepare('SELECT id FROM compliance_rules WHERE title = :title LIMIT 1');
     $insertRule = $pdo->prepare('INSERT INTO compliance_rules (title, content, icon, penalty, sort_order, status) VALUES (:title, :content, :icon, :penalty, :sort_order, :status)');
-    $updateRule = $pdo->prepare('UPDATE compliance_rules SET content = :content, icon = :icon, penalty = :penalty, sort_order = :sort_order, status = :status WHERE title = :title');
+    $updateRule = $pdo->prepare('UPDATE compliance_rules SET content = :content, icon = :icon, penalty = :penalty WHERE title = :title');
     foreach ($defaultRules as $rule) {
         $upsertRule->execute([':title' => $rule['title']]);
         if ($upsertRule->fetchColumn()) {
-            $updateRule->execute($rule);
+            $updateRule->execute([
+                ':title' => $rule['title'],
+                ':content' => $rule['content'],
+                ':icon' => $rule['icon'],
+                ':penalty' => $rule['penalty'],
+            ]);
         } else {
             $insertRule->execute($rule);
         }
@@ -1255,14 +1269,17 @@ function lwInitializeDatabase(PDO $pdo): void
         $insertFounder->execute([
             ':content' => "\"I started LearnWise with one clear belief—students deserve more value than what most education offers today. We deeply respect the time you invest and every single penny you spend. And we carry a strong promise—to deliver 10x value in return through everything we do. This is not about promises alone. It\'s about consistently delivering real quality, with honesty and global standards at the core\"\n\nLearnWise\nNarmadha Suresh\nFounder & CEO"
         ]);
-    } else {
-        $pdo->exec('UPDATE page_sections SET sort_order = 8, status = "active" WHERE page_id = 1 AND section_type = "founder"');
     }
 
-    // Ensure Founder+Teachers appear before Testimonials, which appears before Lead Form (sort=17)
-    $pdo->exec('UPDATE page_sections SET sort_order = 14 WHERE page_id = 1 AND section_type = "founder"');
-    $pdo->exec('UPDATE page_sections SET sort_order = 15 WHERE page_id = 1 AND section_key = "teachers_showcase"');
-    $pdo->exec('UPDATE page_sections SET sort_order = 16 WHERE page_id = 1 AND section_key = "testimonials"');
+    $initialPageSortSeeded = $pdo->query("SELECT setting_value FROM website_settings WHERE setting_key = 'page_sections_initial_sort_seeded' LIMIT 1")->fetchColumn();
+    if ($initialPageSortSeeded !== '1') {
+        $pdo->exec('UPDATE page_sections SET sort_order = 14 WHERE page_id = 1 AND section_type = "founder"');
+        $pdo->exec('UPDATE page_sections SET sort_order = 15 WHERE page_id = 1 AND section_key = "teachers_showcase"');
+        $pdo->exec('UPDATE page_sections SET sort_order = 16 WHERE page_id = 1 AND section_key = "testimonials"');
+        lwSaveSetting($pdo, 'page_sections_initial_sort_seeded', '1', 'text');
+    }
+
+    lwSaveSetting($pdo, 'db_initial_seed_completed', '1', 'text');
 }
 
 try {

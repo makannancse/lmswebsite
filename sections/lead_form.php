@@ -1,7 +1,7 @@
 <?php
 $leadSettings = getSectionSettings($section);
 $leadBenefits = parseTextBlocks($section['content'] ?? '');
-$formAnchor = preg_replace('/[^a-z0-9_-]+/i', '-', (string) ($section['key'] ?? 'lead-form'));
+$formAnchor = 'lead-form';
 $sectionKey = (string) ($section['key'] ?? 'lead-form');
 $formId = $sectionKey === 'enroll-form' ? 'enrollForm' : $formAnchor . '-form';
 $redirectAfter = $sectionKey === 'enroll-form' ? 'enroll.php' : '';

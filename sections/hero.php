@@ -29,13 +29,6 @@ if (!is_array($heroStats) || $heroStats === []) {
     $parsedStats = parseStructuredLines((string) ($heroSettings['stats_lines'] ?? ''), 2);
     $heroStats = array_map(static fn ($row) => ['value' => $row[0] ?? '', 'label' => $row[1] ?? ''], $parsedStats);
 }
-if ($heroStats === []) {
-    $heroStats = [
-        ['value' => count(getTeachers()) . '+', 'label' => 'Expert teachers'],
-        ['value' => count(getCourses()) . '+', 'label' => 'Learning programs'],
-        ['value' => 'Free', 'label' => 'Trial class'],
-    ];
-}
 
 $hasHeroImage = !empty($section['image']);
 ?>
@@ -90,7 +83,7 @@ $hasHeroImage = !empty($section['image']);
                             <img src="<?= htmlspecialchars($section['image']) ?>" alt="<?= htmlspecialchars($section['title'] ?? '') ?>" class="hero-visual-image img-fluid" fetchpriority="high" decoding="async" width="600" height="520">
                         </div>
 
-                        <div class="hero-floating-panel">
+                        <!-- <div class="hero-floating-panel">
                             <div class="row g-3">
                                 <?php foreach ($heroStats as $stat): ?>
                                     <div class="col-4">
@@ -101,7 +94,7 @@ $hasHeroImage = !empty($section['image']);
                                     </div>
                                 <?php endforeach; ?>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             <?php endif; ?>

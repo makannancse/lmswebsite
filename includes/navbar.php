@@ -32,8 +32,7 @@ $navCtaLink = getSetting('nav_cta_link', '#lead-form');
                 <?php endforeach; ?>
             </ul>
             <div class="d-flex gap-2">
-                <a href="enroll.php" class="btn btn-outline-primary d-none d-lg-inline-flex px-3">Enroll</a>
-                <a href="<?= htmlspecialchars($navCtaLink) ?>" class="btn btn-primary btn-enroll px-4"><?= htmlspecialchars($navCtaText) ?></a>
+                <a href="index.php#lead-form" class="btn btn-primary btn-enroll px-4"><?= htmlspecialchars($navCtaText) ?></a>
             </div>
         </div>
     </div>

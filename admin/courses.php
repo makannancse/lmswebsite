@@ -20,6 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $category = trim($_POST['category'] ?? '');
         $description = trim($_POST['description'] ?? '');
         $status = in_array($_POST['status'] ?? 'active', ['active', 'inactive'], true) ? $_POST['status'] : 'active';
+        $sortOrder = (int) ($_POST['sort_order'] ?? 0);
         $imagePath = trim($_POST['current_image'] ?? '');
 
         $uploadError = null;
@@ -54,25 +55,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $message = $uploadError;
             $messageType = 'danger';
         } elseif ($courseId) {
-            $stmt = $pdo->prepare('UPDATE courses SET title = :title, description = :description, category = :category, image = :image, status = :status WHERE id = :id');
+            $stmt = $pdo->prepare('UPDATE courses SET title = :title, description = :description, category = :category, image = :image, status = :status, sort_order = :sort_order WHERE id = :id');
             $stmt->execute([
                 ':title' => $title,
                 ':description' => $description,
                 ':category' => $category,
                 ':image' => $imagePath,
                 ':status' => $status,
+                ':sort_order' => $sortOrder,
                 ':id' => $courseId,
             ]);
             header('Location: courses.php?success=1');
             exit;
         } else {
-            $stmt = $pdo->prepare('INSERT INTO courses (title, description, category, image, status) VALUES (:title, :description, :category, :image, :status)');
+            $stmt = $pdo->prepare('INSERT INTO courses (title, description, category, image, status, sort_order) VALUES (:title, :description, :category, :image, :status, :sort_order)');
             $stmt->execute([
                 ':title' => $title,
                 ':description' => $description,
                 ':category' => $category,
                 ':image' => $imagePath,
                 ':status' => $status,
+                ':sort_order' => $sortOrder,
             ]);
             header('Location: courses.php?success=1');
             exit;
@@ -94,7 +97,7 @@ if ($course === null && !empty($_GET['edit'])) {
     $course = $course->fetch(PDO::FETCH_ASSOC);
 }
 
-$courses = $pdo->query('SELECT * FROM courses ORDER BY created_at DESC')->fetchAll(PDO::FETCH_ASSOC);
+$courses = $pdo->query('SELECT * FROM courses ORDER BY sort_order ASC, created_at DESC')->fetchAll(PDO::FETCH_ASSOC);
 include __DIR__ . '/admin-header.php';
 ?>
 <?php if (!empty($_GET['success'])): ?>
@@ -143,6 +146,10 @@ include __DIR__ . '/admin-header.php';
                         <option value="inactive" <?= ($course['status'] ?? '') === 'inactive' ? 'selected' : '' ?>>Inactive</option>
                     </select>
                 </div>
+                <div class="mb-3">
+                    <label class="form-label">Sort Order</label>
+                    <input type="number" name="sort_order" class="form-control" value="<?= htmlspecialchars($course['sort_order'] ?? '0') ?>">
+                </div>
                 <button type="submit" class="btn btn-primary">Save Course</button>
             </form>
         </div>
@@ -156,6 +163,7 @@ include __DIR__ . '/admin-header.php';
                         <tr>
                             <th>Title</th>
                             <th>Category</th>
+                            <th>Sort Order</th>
                             <th>Status</th>
                             <th class="text-end">Actions</th>
                         </tr>
@@ -165,6 +173,7 @@ include __DIR__ . '/admin-header.php';
                             <tr>
                                 <td><?= htmlspecialchars($row['title']) ?></td>
                                 <td><?= htmlspecialchars($row['category']) ?></td>
+                                <td><?= htmlspecialchars($row['sort_order']) ?></td>
                                 <td><?= htmlspecialchars($row['status']) ?></td>
                                 <td class="text-end">
                                     <a href="courses.php?edit=<?= $row['id'] ?>" class="btn btn-sm btn-outline-primary">Edit</a>

@@ -192,7 +192,7 @@ function getTeachers($status = 'active'): array
         $query .= ' WHERE status = :status';
         $params[':status'] = $status;
     }
-    $query .= ' ORDER BY created_at DESC, id DESC';
+    $query .= ' ORDER BY sort_order ASC, created_at DESC, id DESC';
     $stmt = $pdo->prepare($query);
     $stmt->execute($params);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);

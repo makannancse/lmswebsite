@@ -54,10 +54,11 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                 $designation = trim((string) ($_POST['designation'] ?? ''));
                 $qualifications = trim((string) ($_POST['qualifications'] ?? ''));
                 $bio = trim((string) ($_POST['bio'] ?? ''));
-                $experienceYears = max(0, (int) ($_POST['experience_years'] ?? 0));
-                $studentsCount = max(0, (int) ($_POST['students_count'] ?? 0));
-                $experience = $experienceYears > 0 ? $experienceYears . ' years' : '';
+                $experienceYears = (int) ($_POST['experience_years'] ?? 0);
+                $studentsCount = (int) ($_POST['students_count'] ?? 0);
+                $sortOrder = (int) ($_POST['sort_order'] ?? 0);
                 $status = isset($_POST['status']) ? 'active' : 'inactive';
+                $experience = $experienceYears > 0 ? $experienceYears . ' years' : '';
                 $currentTeacher = $action === 'edit' ? lwFetchTeacher($pdo, $id) : null;
 
                 if ($name === '' || $subject === '') {
@@ -96,8 +97,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 
                         if ($action === 'add') {
                             $stmt = $pdo->prepare('
-                                INSERT INTO teachers (name, subject, designation, experience, qualifications, bio, experience_years, students_count, image, status)
-                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                INSERT INTO teachers (name, subject, designation, experience, qualifications, bio, experience_years, students_count, image, status, sort_order)
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                             ');
                             $stmt->execute([
                                 $name,
@@ -110,12 +111,13 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                                 $studentsCount,
                                 $imagePath,
                                 $status,
+                                $sortOrder,
                             ]);
                             $message = 'Teacher added successfully.';
                         } else {
                             $stmt = $pdo->prepare('
                                 UPDATE teachers
-                                SET name = ?, subject = ?, designation = ?, experience = ?, qualifications = ?, bio = ?, experience_years = ?, students_count = ?, image = ?, status = ?
+                                SET name = ?, subject = ?, designation = ?, experience = ?, qualifications = ?, bio = ?, experience_years = ?, students_count = ?, image = ?, status = ?, sort_order = ?
                                 WHERE id = ?
                             ');
                             $stmt->execute([
@@ -129,6 +131,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                                 $studentsCount,
                                 $imagePath,
                                 $status,
+                                $sortOrder,
                                 $id,
                             ]);
                             $message = 'Teacher updated successfully.';
@@ -254,6 +257,7 @@ include __DIR__ . '/admin-header.php';
                     <th>Subject</th>
                     <th>Experience</th>
                     <th>Students</th>
+                    <th>Order</th>
                     <th>Status</th>
                     <th class="text-end">Actions</th>
                 </tr>
@@ -277,6 +281,7 @@ include __DIR__ . '/admin-header.php';
                         <td><?= htmlspecialchars($teacher['subject']) ?></td>
                         <td><?= (int) ($teacher['experience_years'] ?? 0) ?> yrs</td>
                         <td><?= (int) ($teacher['students_count'] ?? 0) ?>+</td>
+                        <td><?= (int) ($teacher['sort_order'] ?? 0) ?></td>
                         <td>
                             <span class="badge bg-<?= $status === 'active' ? 'success' : 'secondary' ?>">
                                 <?= $status === 'active' ? 'Active' : 'Inactive' ?>
@@ -355,13 +360,17 @@ include __DIR__ . '/admin-header.php';
                             </div>
 
                             <div class="row">
-                                <div class="col-md-6 mb-3">
+                                <div class="col-md-4 mb-3">
                                     <label for="experience_years" class="form-label">Experience (Years)</label>
                                     <input type="number" class="form-control" id="experience_years" name="experience_years" min="0" value="0">
                                 </div>
-                                <div class="col-md-6 mb-3">
+                                <div class="col-md-4 mb-3">
                                     <label for="students_count" class="form-label">Students Count</label>
                                     <input type="number" class="form-control" id="students_count" name="students_count" min="0" value="0">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="sort_order" class="form-label">Sort Order</label>
+                                    <input type="number" class="form-control" id="sort_order" name="sort_order" value="0">
                                 </div>
                             </div>
 
@@ -438,6 +447,7 @@ function resetForm() {
     document.getElementById('teacherSubmitButton').textContent = 'Save Teacher';
     document.getElementById('experience_years').value = '0';
     document.getElementById('students_count').value = '0';
+    document.getElementById('sort_order').value = '0';
     document.getElementById('designation').value = '';
     document.getElementById('status').checked = true;
     document.getElementById('remove_image').checked = false;
@@ -463,6 +473,7 @@ function editTeacher(id) {
     document.getElementById('bio').value = teacher.bio || '';
     document.getElementById('experience_years').value = teacher.experience_years || '0';
     document.getElementById('students_count').value = teacher.students_count || '0';
+    document.getElementById('sort_order').value = teacher.sort_order || '0';
     document.getElementById('status').checked = teacher.status === 'active';
     document.getElementById('image').value = '';
     document.getElementById('remove_image').checked = false;
