@@ -1481,8 +1481,8 @@ section {
 }
 
 .founder-combined-img {
-    width: 160px;
-    height: 160px;
+    width: 180px;
+    height: 185px;
     object-fit: cover;
     border-radius: 20px;
     box-shadow: 0 16px 48px rgba(19, 35, 58, 0.12);
@@ -1548,8 +1548,8 @@ section {
 }
 
 .expert-card-avatar {
-    width: 80px;
-    height: 80px;
+    width: 130px;
+    height: 135px;
     border-radius: 50%;
     object-fit: cover;
     border: 3px solid rgba(30, 115, 190, 0.12);
