@@ -31,3 +31,8 @@ function lwLogAdminLogin(array $entry): void
 {
     lwLogToFile('admin_login_debug.log', $entry);
 }
+
+function lwLogSpam(array $entry): void
+{
+    lwLogToFile('spam.log', $entry);
+}

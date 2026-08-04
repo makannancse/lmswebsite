@@ -111,6 +111,20 @@
 
             const data = await parseLeadResponse(response);
 
+            if (data.csrf_token) {
+                document.querySelectorAll('input[name="csrf_token"]').forEach(function (input) {
+                    input.value = data.csrf_token;
+                });
+            }
+
+            if (window.turnstile) {
+                try {
+                    window.turnstile.reset();
+                } catch (e) {
+                    // Turnstile reset optional catch
+                }
+            }
+
             if (window.Swal && Swal.isVisible()) {
                 Swal.close();
             }
@@ -147,6 +161,11 @@
                 });
             }
         } catch (error) {
+            if (window.turnstile) {
+                try {
+                    window.turnstile.reset();
+                } catch (e) {}
+            }
             if (window.Swal && Swal.isVisible()) {
                 Swal.close();
             }

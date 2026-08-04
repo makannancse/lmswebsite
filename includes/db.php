@@ -21,8 +21,8 @@ if (!empty($localConfig['app_base_path'])) {
 
 $dbHost = (string) ($localConfig['db_host'] ?? 'localhost');
 $dbName = (string) ($localConfig['db_name'] ?? 'learnwise');
-$dbUser = (string) ($localConfig['db_user'] ?? 'admin');
-$dbPass = (string) ($localConfig['db_pass'] ?? 'StrongPassword123!');
+$dbUser = (string) ($localConfig['db_user'] ?? 'root');
+$dbPass = (string) ($localConfig['db_pass'] ?? '');
 
 function lwTableExists(PDO $pdo, string $table): bool
 {

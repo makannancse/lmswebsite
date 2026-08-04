@@ -4,6 +4,7 @@ require_once __DIR__ . '/pdo.php';
 require_once __DIR__ . '/site.php';
 require_once __DIR__ . '/logger.php';
 require_once __DIR__ . '/mailer.php';
+require_once __DIR__ . '/spam-guard.php';
 
 function lwIsAjaxRequest(): bool
 {
@@ -12,6 +13,10 @@ function lwIsAjaxRequest(): bool
 
 function lwRespondLead(array $payload, bool $isAjax, string $redirectAnchor = ''): void
 {
+    if (function_exists('lwRegenerateCsrfToken')) {
+        $payload['csrf_token'] = lwRegenerateCsrfToken();
+    }
+
     if ($isAjax) {
         if (!headers_sent()) {
             header('Content-Type: application/json; charset=utf-8');
@@ -36,19 +41,19 @@ function lwRespondLead(array $payload, bool $isAjax, string $redirectAnchor = ''
 function lwValidateLeadInput(array $input): array
 {
     $errors = [];
-    $name = trim((string) ($input['name'] ?? ''));
-    $parentName = trim((string) ($input['parent_name'] ?? ''));
-    $studentName = trim((string) ($input['student_name'] ?? ''));
+    $name = lwSanitizeInput((string) ($input['name'] ?? ''));
+    $parentName = lwSanitizeInput((string) ($input['parent_name'] ?? ''));
+    $studentName = lwSanitizeInput((string) ($input['student_name'] ?? ''));
     $email = trim((string) ($input['email'] ?? ''));
-    $phone = trim((string) ($input['phone'] ?? ''));
-    $course = trim((string) ($input['course'] ?? ''));
-    $message = trim((string) ($input['message'] ?? ''));
+    $phone = lwSanitizeInput((string) ($input['phone'] ?? ''));
+    $course = lwSanitizeInput((string) ($input['course'] ?? ''));
+    $message = lwSanitizeInput((string) ($input['message'] ?? ''));
 
     if ($name === '') {
         $errors[] = 'Please enter your name.';
     }
 
-    if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    if ($email === '' || !lwValidateEmailFormat($email)) {
         $errors[] = 'Please enter a valid email address.';
     }
 
@@ -71,7 +76,7 @@ function lwValidateLeadInput(array $input): array
             'phone' => $phone,
             'course' => $course,
             'message' => $message,
-            'source' => trim((string) ($input['lead_source'] ?? 'website')),
+            'source' => lwSanitizeInput((string) ($input['lead_source'] ?? 'website')),
         ],
     ];
 }
@@ -79,6 +84,27 @@ function lwValidateLeadInput(array $input): array
 function lwProcessLeadSubmission(array $input, string $redirectAnchor = '', bool $forceJson = false): void
 {
     $isAjax = $forceJson || lwIsAjaxRequest();
+
+    $spamCheck = lwRunSpamGauntlet($input, $_SESSION ?? []);
+    if ($spamCheck['blocked']) {
+        if (!empty($spamCheck['fake_ok'])) {
+            lwRespondLead([
+                'success' => true,
+                'message' => $spamCheck['message'],
+            ], $isAjax, $redirectAnchor);
+        }
+
+        if (!headers_sent() && !empty($spamCheck['http_code'])) {
+            http_response_code($spamCheck['http_code']);
+        }
+
+        lwRespondLead([
+            'success' => false,
+            'message' => $spamCheck['message'],
+            'errors' => [$spamCheck['message']],
+        ], $isAjax, $redirectAnchor);
+    }
+
     $validation = lwValidateLeadInput($input);
 
     lwLogEnrollment([

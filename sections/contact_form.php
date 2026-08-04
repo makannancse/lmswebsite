@@ -18,6 +18,14 @@ $sectionSubtitle = $section['subtitle'] ?? ($section['section_subtitle'] ?? '');
                         <input type="hidden" name="lead_source" value="<?= htmlspecialchars($contactSettings['source'] ?? 'Contact Page') ?>">
                         <input type="hidden" name="form_anchor" value="<?= htmlspecialchars($formAnchor) ?>">
                         <input type="hidden" name="redirect_after" value="contact.php">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(lwGetCsrfToken()) ?>">
+                        <input type="hidden" name="form_load_time" value="<?= time() ?>">
+
+                        <div class="lw-hp-field" aria-hidden="true" tabindex="-1">
+                            <label for="contact-website">Website</label>
+                            <input type="text" name="website" id="contact-website" autocomplete="off" tabindex="-1">
+                        </div>
+
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label" for="contact-name">Name *</label>
@@ -53,6 +61,11 @@ $sectionSubtitle = $section['subtitle'] ?? ($section['section_subtitle'] ?? '');
                                 <label class="form-label" for="contact-message">Message</label>
                                 <textarea id="contact-message" name="message" rows="4" class="form-control" placeholder="How can we help you? (required if no course selected)"></textarea>
                             </div>
+                            <?php if (lwSpamGuardConfig('turnstile_enabled', false)): ?>
+                                <div class="col-12 my-2">
+                                    <div class="cf-turnstile" data-sitekey="<?= htmlspecialchars(lwSpamGuardConfig('turnstile_site_key', '')) ?>"></div>
+                                </div>
+                            <?php endif; ?>
                             <div class="col-12 text-end">
                                 <button type="submit" class="btn btn-primary btn-lg">Send Message</button>
                             </div>

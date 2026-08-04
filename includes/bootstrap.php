@@ -10,7 +10,7 @@ function lwRuntimePath(string $path = ''): string
 
 function lwEnsureRuntimeDirectories(): void
 {
-    foreach ([lwRuntimePath(), lwRuntimePath('sessions')] as $directory) {
+    foreach ([lwRuntimePath(), lwRuntimePath('sessions'), lwRuntimePath('rate_limits')] as $directory) {
         if (!is_dir($directory)) {
             @mkdir($directory, 0755, true);
         }

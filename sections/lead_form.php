@@ -44,6 +44,13 @@ $courses = getCourses();
                             <input type="hidden" name="lead_source" value="<?= htmlspecialchars($leadSettings['source'] ?? 'Homepage Demo Form') ?>">
                             <input type="hidden" name="form_anchor" value="<?= htmlspecialchars($formAnchor) ?>">
                             <input type="hidden" name="redirect_after" value="<?= htmlspecialchars($redirectAfter) ?>">
+                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(lwGetCsrfToken()) ?>">
+                            <input type="hidden" name="form_load_time" value="<?= time() ?>">
+
+                            <div class="lw-hp-field" aria-hidden="true" tabindex="-1">
+                                <label for="<?= htmlspecialchars($formAnchor) ?>-website">Website</label>
+                                <input type="text" name="website" id="<?= htmlspecialchars($formAnchor) ?>-website" autocomplete="off" tabindex="-1">
+                            </div>
 
                             <div class="row g-3">
                                 <div class="col-md-6">
@@ -80,6 +87,11 @@ $courses = getCourses();
                                     <label for="<?= htmlspecialchars($formAnchor) ?>-message" class="form-label fw-semibold">Message</label>
                                     <textarea id="<?= htmlspecialchars($formAnchor) ?>-message" name="message" rows="3" class="form-control form-control-lg" placeholder="Grade level, goals, preferred schedule, or any questions"></textarea>
                                 </div>
+                                <?php if (lwSpamGuardConfig('turnstile_enabled', false)): ?>
+                                    <div class="col-12 my-2">
+                                        <div class="cf-turnstile" data-sitekey="<?= htmlspecialchars(lwSpamGuardConfig('turnstile_site_key', '')) ?>"></div>
+                                    </div>
+                                <?php endif; ?>
                                 <div class="col-12">
                                     <button type="submit" class="btn btn-primary btn-lg px-5 lead-submit-btn">Book My Free Trial</button>
                                 </div>

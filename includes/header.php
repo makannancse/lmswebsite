@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/spam-guard.php';
 $pageTitle = $pageTitle ?? getSetting('site_name', 'LearnWise');
 $pageDescription = $pageDescription ?? getSetting('site_tagline', 'Premium online learning with expert teachers, flexible schedules, and parent-friendly progress tracking.');
 $pageOgImage = $pageOgImage ?? getSiteLogo();
@@ -9,6 +10,9 @@ $canonicalUrl = $appUrl . '/' . ltrim(basename((string) ($_SERVER['SCRIPT_NAME']
 if (basename((string) ($_SERVER['SCRIPT_NAME'] ?? '')) === 'index.php') {
     $canonicalUrl = $appUrl;
 }
+$csrfToken = lwGetCsrfToken();
+$turnstileEnabled = (bool) lwSpamGuardConfig('turnstile_enabled', false);
+$turnstileSiteKey = (string) lwSpamGuardConfig('turnstile_site_key', '');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -35,6 +39,7 @@ if (basename((string) ($_SERVER['SCRIPT_NAME'] ?? '')) === 'index.php') {
         <link rel="icon" href="<?= htmlspecialchars($favicon) ?>" type="image/png">
     <?php endif; ?>
     <meta name="app-url" content="<?= htmlspecialchars($appUrl) ?>">
+    <meta name="csrf-token" content="<?= htmlspecialchars($csrfToken) ?>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
@@ -42,5 +47,9 @@ if (basename((string) ($_SERVER['SCRIPT_NAME'] ?? '')) === 'index.php') {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/premium-ui.css">
+    <?php if ($turnstileEnabled): ?>
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <?php endif; ?>
 </head>
 <body class="<?= htmlspecialchars($bodyClass) ?>">
+
