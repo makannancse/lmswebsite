@@ -21,7 +21,7 @@ $sectionSubtitle = $section['subtitle'] ?? ($section['section_subtitle'] ?? '');
                         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(lwGetCsrfToken()) ?>">
                         <input type="hidden" name="form_load_time" value="<?= time() ?>">
 
-                        <div class="lw-hp-field" aria-hidden="true" tabindex="-1">
+                        <div class="lw-hp-field" aria-hidden="true" tabindex="-1" style="position: absolute !important; left: -9999px !important; top: -9999px !important; width: 1px !important; height: 1px !important; overflow: hidden !important; opacity: 0 !important; pointer-events: none !important;">
                             <label for="contact-website">Website</label>
                             <input type="text" name="website" id="contact-website" autocomplete="off" tabindex="-1">
                         </div>

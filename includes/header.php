@@ -45,8 +45,8 @@ $turnstileSiteKey = (string) lwSpamGuardConfig('turnstile_site_key', '');
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="assets/css/style.css">
-    <link rel="stylesheet" href="assets/css/premium-ui.css">
+    <link rel="stylesheet" href="assets/css/style.css?v=20260804">
+    <link rel="stylesheet" href="assets/css/premium-ui.css?v=20260804">
     <?php if ($turnstileEnabled): ?>
         <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <?php endif; ?>
