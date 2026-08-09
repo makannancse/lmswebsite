@@ -14,7 +14,7 @@ $sectionSubtitle = $section['subtitle'] ?? ($section['section_subtitle'] ?? '');
                         <h2 class="section-title text-primary mb-2"><?= htmlspecialchars($sectionTitle) ?></h2>
                         <p class="text-muted mb-0"><?= htmlspecialchars($sectionSubtitle) ?></p>
                     </div>
-                    <form method="post" action="" id="contactForm" class="lw-lead-form" data-form-anchor="<?= htmlspecialchars($formAnchor) ?>" data-redirect="" onsubmit="return false;">
+                    <form method="post" action="" id="contactForm" class="lw-lead-form" data-form-anchor="<?= htmlspecialchars($formAnchor) ?>" data-redirect="">
                         <input type="hidden" name="lead_source" value="<?= htmlspecialchars($contactSettings['source'] ?? 'Contact Page') ?>">
                         <input type="hidden" name="form_anchor" value="<?= htmlspecialchars($formAnchor) ?>">
                         <input type="hidden" name="redirect_after" value="">
@@ -61,7 +61,7 @@ $sectionSubtitle = $section['subtitle'] ?? ($section['section_subtitle'] ?? '');
                                 <label class="form-label" for="contact-message">Message</label>
                                 <textarea id="contact-message" name="message" rows="4" class="form-control" placeholder="How can we help you? (required if no course selected)"></textarea>
                             </div>
-                            <?php if (lwSpamGuardConfig('turnstile_enabled', false)): ?>
+                            <?php if (lwIsTurnstileConfigured()): ?>
                                 <div class="col-12 my-2">
                                     <div class="cf-turnstile" data-sitekey="<?= htmlspecialchars(lwSpamGuardConfig('turnstile_site_key', '')) ?>"></div>
                                 </div>

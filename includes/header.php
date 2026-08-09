@@ -11,7 +11,7 @@ if (basename((string) ($_SERVER['SCRIPT_NAME'] ?? '')) === 'index.php') {
     $canonicalUrl = $appUrl;
 }
 $csrfToken = lwGetCsrfToken();
-$turnstileEnabled = (bool) lwSpamGuardConfig('turnstile_enabled', false);
+$turnstileEnabled = lwIsTurnstileConfigured();
 $turnstileSiteKey = (string) lwSpamGuardConfig('turnstile_site_key', '');
 ?>
 <!DOCTYPE html>

@@ -39,7 +39,6 @@ $courses = getCourses();
                             class="lw-lead-form"
                             data-form-anchor="<?= htmlspecialchars($formAnchor) ?>"
                             data-redirect="<?= htmlspecialchars($redirectAfter) ?>"
-                            onsubmit="return false;"
                         >
                             <input type="hidden" name="lead_source" value="<?= htmlspecialchars($leadSettings['source'] ?? 'Homepage Demo Form') ?>">
                             <input type="hidden" name="form_anchor" value="<?= htmlspecialchars($formAnchor) ?>">
@@ -87,7 +86,7 @@ $courses = getCourses();
                                     <label for="<?= htmlspecialchars($formAnchor) ?>-message" class="form-label fw-semibold">Message</label>
                                     <textarea id="<?= htmlspecialchars($formAnchor) ?>-message" name="message" rows="3" class="form-control form-control-lg" placeholder="Grade level, goals, preferred schedule, or any questions"></textarea>
                                 </div>
-                                <?php if (lwSpamGuardConfig('turnstile_enabled', false)): ?>
+                                <?php if (lwIsTurnstileConfigured()): ?>
                                     <div class="col-12 my-2">
                                         <div class="cf-turnstile" data-sitekey="<?= htmlspecialchars(lwSpamGuardConfig('turnstile_site_key', '')) ?>"></div>
                                     </div>

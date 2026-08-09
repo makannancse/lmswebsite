@@ -37,6 +37,30 @@ function lwSpamGuardConfig(string $key, mixed $default = null): mixed
     return $cfg[$key] ?? $default;
 }
 
+/**
+ * Returns true ONLY if Turnstile is explicitly enabled and valid non-placeholder keys are set.
+ */
+function lwIsTurnstileConfigured(): bool
+{
+    $enabled   = (bool) lwSpamGuardConfig('turnstile_enabled', false);
+    $siteKey   = trim((string) lwSpamGuardConfig('turnstile_site_key', ''));
+    $secretKey = trim((string) lwSpamGuardConfig('turnstile_secret_key', ''));
+
+    if (!$enabled) {
+        return false;
+    }
+
+    if ($siteKey === '' || str_starts_with(strtoupper($siteKey), 'YOUR_')) {
+        return false;
+    }
+
+    if ($secretKey === '' || str_starts_with(strtoupper($secretKey), 'YOUR_')) {
+        return false;
+    }
+
+    return true;
+}
+
 // ---------------------------------------------------------------
 // 1. Client IP resolution
 // ---------------------------------------------------------------
@@ -589,8 +613,7 @@ function lwRunSpamGauntlet(array $post, array $session): array
     }
 
     // ----- Check 8: Cloudflare Turnstile -----
-    $turnstileEnabled = (bool) lwSpamGuardConfig('turnstile_enabled', false);
-    if ($turnstileEnabled) {
+    if (lwIsTurnstileConfigured()) {
         $token = trim((string) ($post['cf-turnstile-response'] ?? ''));
         if (!lwVerifyTurnstileToken($token, $ip)) {
             $spamCtx['reason'] = 'turnstile_failed';

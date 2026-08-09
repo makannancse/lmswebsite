@@ -225,6 +225,16 @@
                 event.stopPropagation();
                 submitLeadForm(form);
             });
+
+            const submitBtn = form.querySelector('[type="submit"]');
+            if (submitBtn) {
+                submitBtn.addEventListener('click', function (event) {
+                    if (form.checkValidity()) {
+                        event.preventDefault();
+                        submitLeadForm(form);
+                    }
+                });
+            }
         });
     }
 
