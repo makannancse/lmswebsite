@@ -64,6 +64,25 @@
             return false;
         }
 
+        const turnstileWidget = form.querySelector('.cf-turnstile');
+        if (turnstileWidget && window.turnstile) {
+            const turnstileInput = form.querySelector('[name="cf-turnstile-response"]');
+            if (!turnstileInput || !turnstileInput.value) {
+                const securityText = 'Please complete the security check before submitting.';
+                if (window.Swal) {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Verification Required',
+                        text: securityText,
+                        confirmButtonColor: '#1E73BE'
+                    });
+                } else {
+                    window.alert(securityText);
+                }
+                return false;
+            }
+        }
+
         return true;
     }
 
@@ -144,9 +163,15 @@
                     });
                 }
 
-                const redirectTarget = redirectPath || data.redirect || '';
-                if (redirectTarget) {
-                    window.location.href = buildRedirectUrl(redirectTarget);
+                const currentFile = (window.location.pathname.split('/').pop() || '').toLowerCase();
+                const rawTarget = (redirectPath || data.redirect || '').trim();
+                const targetFile = (rawTarget.split('/').pop() || '').toLowerCase().replace(/#.*/, '');
+
+                const isDifferentPage = rawTarget !== '' && targetFile !== currentFile && rawTarget !== '#';
+
+                if (isDifferentPage) {
+                    window.location.href = buildRedirectUrl(rawTarget);
+                    return;
                 }
 
                 return;
@@ -200,14 +225,6 @@
                 event.stopPropagation();
                 submitLeadForm(form);
             });
-
-            const submitButton = form.querySelector('[type="submit"]');
-            if (submitButton) {
-                submitButton.addEventListener('click', function (event) {
-                    event.preventDefault();
-                    submitLeadForm(form);
-                });
-            }
         });
     }
 

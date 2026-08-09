@@ -73,13 +73,16 @@ function lwGetClientIp(): string
 function lwVerifyFormOrigin(): bool
 {
     $appUrl  = rtrim(lwGetAppUrl(), '/');
-    $appHost = parse_url($appUrl, PHP_URL_HOST) ?? '';
+    $appHost = strtolower(parse_url($appUrl, PHP_URL_HOST) ?? '');
+    $appHost = preg_replace('/^www\./i', '', $appHost);
 
     // Check HTTP_ORIGIN (sent by browsers on CORS / fetch requests)
     $origin = trim((string) ($_SERVER['HTTP_ORIGIN'] ?? ''));
     if ($origin !== '') {
-        $originHost = parse_url($origin, PHP_URL_HOST) ?? '';
-        if (strcasecmp($originHost, $appHost) !== 0) {
+        $originHost = strtolower(parse_url($origin, PHP_URL_HOST) ?? '');
+        $originHost = preg_replace('/^www\./i', '', $originHost);
+        if ($originHost !== '' && $appHost !== '' && strcasecmp($originHost, $appHost) !== 0) {
+            error_log("[LearnWise][SpamGuard] Origin mismatch: origin=$originHost, app=$appHost");
             return false;
         }
     }
@@ -87,8 +90,10 @@ function lwVerifyFormOrigin(): bool
     // Check HTTP_REFERER (sent by browser on form POSTs)
     $referer = trim((string) ($_SERVER['HTTP_REFERER'] ?? ''));
     if ($referer !== '') {
-        $refHost = parse_url($referer, PHP_URL_HOST) ?? '';
-        if (strcasecmp($refHost, $appHost) !== 0) {
+        $refHost = strtolower(parse_url($referer, PHP_URL_HOST) ?? '');
+        $refHost = preg_replace('/^www\./i', '', $refHost);
+        if ($refHost !== '' && $appHost !== '' && strcasecmp($refHost, $appHost) !== 0) {
+            error_log("[LearnWise][SpamGuard] Referer mismatch: referer=$refHost, app=$appHost");
             return false;
         }
     }
@@ -386,10 +391,10 @@ function lwValidateEmailFormat(string $email): bool
  */
 function lwVerifyTurnstileToken(string $token, string $ip): bool
 {
-    $secretKey = (string) lwSpamGuardConfig('turnstile_secret_key', '');
+    $secretKey = trim((string) lwSpamGuardConfig('turnstile_secret_key', ''));
 
-    if ($secretKey === '') {
-        // Turnstile not configured — skip (useful for local dev).
+    if ($secretKey === '' || str_starts_with(strtoupper($secretKey), 'YOUR_')) {
+        // Turnstile secret key not configured or using example placeholder — bypass validation
         return true;
     }
 

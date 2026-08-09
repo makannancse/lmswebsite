@@ -14,10 +14,10 @@ $sectionSubtitle = $section['subtitle'] ?? ($section['section_subtitle'] ?? '');
                         <h2 class="section-title text-primary mb-2"><?= htmlspecialchars($sectionTitle) ?></h2>
                         <p class="text-muted mb-0"><?= htmlspecialchars($sectionSubtitle) ?></p>
                     </div>
-                    <form method="post" action="" id="contactForm" class="lw-lead-form" data-form-anchor="<?= htmlspecialchars($formAnchor) ?>" data-redirect="contact.php" onsubmit="return false;">
+                    <form method="post" action="" id="contactForm" class="lw-lead-form" data-form-anchor="<?= htmlspecialchars($formAnchor) ?>" data-redirect="" onsubmit="return false;">
                         <input type="hidden" name="lead_source" value="<?= htmlspecialchars($contactSettings['source'] ?? 'Contact Page') ?>">
                         <input type="hidden" name="form_anchor" value="<?= htmlspecialchars($formAnchor) ?>">
-                        <input type="hidden" name="redirect_after" value="contact.php">
+                        <input type="hidden" name="redirect_after" value="">
                         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(lwGetCsrfToken()) ?>">
                         <input type="hidden" name="form_load_time" value="<?= time() ?>">
 
