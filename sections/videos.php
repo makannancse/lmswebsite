@@ -76,7 +76,7 @@ if (!$useVideoLibrary && $contentItems !== []) {
             </div>
             <div class="modal-body p-3 p-lg-4">
                 <div class="ratio ratio-16x9 bg-dark rounded-4 overflow-hidden">
-                    <iframe class="w-100 h-100 d-none" allowfullscreen></iframe>
+                    <iframe class="w-100 h-100 d-none" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen title="Sample Class Video"></iframe>
                     <video class="w-100 h-100 d-none" controls playsinline preload="none"></video>
                 </div>
             </div>

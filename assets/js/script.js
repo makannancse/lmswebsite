@@ -300,6 +300,42 @@
         });
     }
 
+    function parseVideoEmbedUrl(url) {
+        if (!url || typeof url !== 'string') {
+            return '';
+        }
+        let clean = url.trim();
+
+        // If an iframe embed code was pasted, extract the src attribute
+        if (clean.includes('<iframe')) {
+            const srcMatch = clean.match(/src=["']([^"']+)["']/i);
+            if (srcMatch && srcMatch[1]) {
+                clean = srcMatch[1].trim();
+            }
+        }
+
+        // YouTube Regex covering: watch?v=, embed/, shorts/, live/, youtu.be/, youtube-nocookie.com/
+        const ytMatch = clean.match(/(?:youtube(?:-nocookie)?\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts|live)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/i);
+        if (ytMatch && ytMatch[1]) {
+            const videoId = ytMatch[1];
+            let originParam = '';
+            try {
+                if (window.location && window.location.origin && window.location.origin !== 'null') {
+                    originParam = '&origin=' + encodeURIComponent(window.location.origin);
+                }
+            } catch (e) {}
+            return 'https://www.youtube-nocookie.com/embed/' + videoId + '?autoplay=1&rel=0&enablejsapi=1&playsinline=1' + originParam;
+        }
+
+        // Vimeo Regex
+        const vimeoMatch = clean.match(/vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/([^\/]*)\/videos\/|album\/(\d+)\/video\/|video\/|)(\d+)/i);
+        if (vimeoMatch && vimeoMatch[3]) {
+            return 'https://player.vimeo.com/video/' + vimeoMatch[3] + '?autoplay=1&dnt=1';
+        }
+
+        return clean;
+    }
+
     function initVideoModals() {
         document.querySelectorAll('.modal').forEach(function (modalElement) {
             const iframe = modalElement.querySelector('iframe');
@@ -318,6 +354,7 @@
                     if (video) {
                         video.classList.remove('d-none');
                         video.src = src;
+                        video.play().catch(function () {});
                     }
                     if (iframe) {
                         iframe.classList.add('d-none');
@@ -326,36 +363,14 @@
                     return;
                 }
 
-                let embedSrc = src.trim();
-                try {
-                    const parsedUrl = new URL(embedSrc, window.location.href);
-                    const host = parsedUrl.hostname.replace(/^www\./, '');
-
-                    if (host === 'youtube.com' || host === 'm.youtube.com') {
-                        const videoId = parsedUrl.searchParams.get('v') || parsedUrl.pathname.replace(/^\/(embed|shorts)\//, '').split('/')[0];
-                        if (videoId) {
-                            embedSrc = 'https://www.youtube.com/embed/' + videoId;
-                        }
-                    } else if (host === 'youtu.be') {
-                        const videoId = parsedUrl.pathname.replace(/^\//, '').split('/')[0];
-                        if (videoId) {
-                            embedSrc = 'https://www.youtube.com/embed/' + videoId;
-                        }
-                    } else if (host === 'vimeo.com') {
-                        const videoId = parsedUrl.pathname.replace(/^\//, '').split('/')[0];
-                        if (videoId) {
-                            embedSrc = 'https://player.vimeo.com/video/' + videoId;
-                        }
-                    }
-                } catch (error) {
-                    embedSrc = src;
-                }
-
-                if (embedSrc.includes('youtube.com/embed/') && !embedSrc.includes('?')) {
-                    embedSrc += '?rel=0';
-                }
+                const embedSrc = parseVideoEmbedUrl(src);
 
                 if (iframe) {
+                    iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
+                    iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+                    iframe.setAttribute('allowfullscreen', 'true');
+                    iframe.setAttribute('frameborder', '0');
+                    iframe.setAttribute('title', 'Video player');
                     iframe.classList.remove('d-none');
                     iframe.src = embedSrc;
                 }
